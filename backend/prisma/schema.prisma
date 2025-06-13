@@ -1,0 +1,620 @@
+// =============================================================================
+// SmartPeças ERP - Prisma Schema Unificado
+// =============================================================================
+// Arquivo: /backend/prisma/schema.prisma
+//
+// Descrição: Estrutura unificada com suporte a multi-tenancy real via PostgreSQL
+// usando schemas distintos por empresa (tenant). O controle de tenants e usuários
+// administrativos ocorre no schema público.
+//
+// Versão: 1.0
+//
+// Equipe SmartPeças
+// Criado em: 12/06/2025
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  // Esta URL deve apontar para o banco de dados base (onde o schema 'public' reside).
+  // A seleção do schema do inquilino será feita dinamicamente no código NestJS.
+  url      = env("DATABASE_URL")
+}
+
+//
+// ---
+// ## SCHEMA PÚBLICO (Global)
+// ---
+// Onde ficam as informações centrais do sistema, o controle de tenants
+// e modelos compartilhados que não são específicos de um inquilino.
+//
+
+/// Modelo de Tenant (empresa)
+/// Armazena informações de cada empresa/loja que usa o sistema.
+model Tenant {
+  id         String   @id @default(uuid())
+  name       String   @unique            // Nome da empresa ou identificador
+  schemaUrl  String   @unique            // Nome do schema PostgreSQL (ex: tenant_loja12)
+  cnpj       String   @unique
+  email      String
+  phone      String?
+  address    String?
+  city       String?
+  state      String?
+  zipCode    String?
+  logo       String?
+  favicon    String?                      // Favicon personalizado do tenant
+  theme      Json?                      // Configurações de tema personalizadas
+  settings   Json?                      // Configurações gerais do tenant
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  adminUsers AdminUser[] // Usuários administrativos globais vinculados a este tenant
+
+  @@map("tenants")
+  @@schema("public") // Indica que esta tabela está no schema 'public'
+}
+
+/// Usuário Administrador (Global)
+/// Usuários que gerenciam tenants ou acessam funcionalidades globais do sistema.
+model AdminUser {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  tenantId  String   // Opcional: Para admins vinculados a um tenant específico (ex: "owner" do tenant)
+  role      String   @default("tenant_admin") // Ex: super_admin, tenant_admin
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  @@map("admin_users")
+  @@schema("public") // Indica que esta tabela está no schema 'public'
+}
+
+/// Modelo de Veículo (Catálogo Global)
+/// Informações sobre veículos que são comuns e podem ser usados por múltiplos inquilinos.
+model Vehicle {
+  id           String             @id @default(uuid())
+  brand        String
+  model        String
+  year         Int
+  engine       String?            // Motorização
+  transmission String?            // Manual/Automático
+  steering     String?            // Hidráulica/Mecânica
+  brakes       String?            // Com ABS/Sem ABS
+  fuelType     String?            // Flex/Gasolina/Diesel/Elétrico
+  doors        Int?
+  isActive     Boolean            @default(true)
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+
+  // Relações para tabelas que residirão nos schemas dos inquilinos
+  // NOTE: Estas relações são meramente ilustrativas no contexto deste schema global.
+  // A ligação real será feita através de lógica de aplicação e IDs quando o PrismaClient
+  // estiver conectado ao schema de um inquilino.
+  compatibility VehicleCompatibility[] // Relação lógica para VehicleCompatibility (dentro do tenant)
+  customerVehicles CustomerVehicle[]   // Relação lógica para CustomerVehicle (dentro do tenant)
+
+  @@map("vehicles")
+  @@schema("public") // Indica que esta tabela está no schema 'public'
+  @@index([brand, model, year])
+}
+
+//
+// ---
+// ## SCHEMAS DE INQUILINO (Tenant-Specific)
+// ---
+// Estes modelos representam as entidades de negócio do seu ERP.
+// No código NestJS, a instância do PrismaClient será configurada
+// para apontar para o schema do inquilino atual antes de realizar
+// operações com estes modelos. **Nenhum campo `tenantId` é necessário aqui.**
+//
+
+/// Detalhes da Empresa dentro de um Tenant (ex: filiais)
+model Company {
+  id              String      @id @default(uuid())
+  name            String
+  tradeName       String?
+  cnpj            String
+  ie              String?     // Inscrição Estadual
+  im              String?     // Inscrição Municipal
+  email           String
+  phone           String?
+  address         String
+  city            String
+  state           String
+  zipCode         String
+  taxRegime       TaxRegime   @default(SIMPLES_NACIONAL)
+  isHeadquarters  Boolean     @default(true)
+  isActive        Boolean     @default(true)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  users           User[]
+  sales           Sale[]
+  purchases       Purchase[]
+  inventory       InventoryItem[]
+
+  @@map("companies")
+  // Sem @@index([tenantId]) - o isolamento é por schema
+}
+
+enum TaxRegime {
+  SIMPLES_NACIONAL
+  LUCRO_PRESUMIDO
+  LUCRO_REAL
+}
+
+/// Usuários do Inquilino
+model User {
+  id          String    @id @default(uuid())
+  companyId   String?   // Opcional: Se o usuário pertencer a uma empresa/filial específica dentro do tenant
+  email       String    @unique // Único DENTRO DO SCHEMA do inquilino
+  password    String
+  name        String
+  avatar      String?
+  phone       String?
+  role        UserRole  @default(SELLER)
+  permissions Json?     // Permissões específicas (RBAC)
+  isActive    Boolean   @default(true)
+  lastLogin   DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  company     Company? @relation(fields: [companyId], references: [id])
+  sales       Sale[]
+  purchases   Purchase[]
+
+  @@map("users")
+  @@index([email]) // Índice para busca rápida por email
+}
+
+enum UserRole {
+  ADMIN       // Admin do tenant (diferente de AdminUser global)
+  MANAGER     // Gerente
+  SELLER      // Vendedor
+  CASHIER     // Caixa
+  STOCK_KEEPER // Responsável pelo estoque
+  ACCOUNTANT  // Contador
+}
+
+/// Produtos do Inquilino
+model Product {
+  id                 String               @id @default(uuid())
+  name               String
+  description        String?
+  sku                String?              @unique
+  barcode            String?
+  ncm                String?              // Nomenclatura Comum do Mercosul
+  cest               String?              // Código Especificador da Substituição Tributária
+  brand              String?
+  model              String?
+  partNumber         String?              // Número da peça original
+  costPrice          Decimal              @db.Decimal(10,2)
+  salePrice          Decimal              @db.Decimal(10,2)
+  weight             Decimal?             @db.Decimal(8,3)
+  dimensions         Json?                // {length, width, height}
+  category           String?
+  subcategory        String?
+  supplierId         String?              // ID do Supplier dentro do mesmo schema do inquilino
+  images             String[]             // Array de URLs das imagens
+  isActive           Boolean              @default(true)
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+
+  supplier           Supplier?            @relation(fields: [supplierId], references: [id])
+  vehicleCompatibility VehicleCompatibility[]
+  saleItems          SaleItem[]
+  purchaseItems      PurchaseItem[]
+  inventoryItems     InventoryItem[]
+
+  @@map("products")
+  @@index([sku])
+  @@index([barcode])
+  @@index([ncm])
+}
+
+/// Compatibilidade de Veículos (por inquilino)
+/// Esta tabela referencia o `Vehicle` global e o `Product` do inquilino.
+/// No seu código NestJS, você precisará carregar o `Vehicle` do schema `public` e o `Product`
+/// do schema do inquilino atual.
+model VehicleCompatibility {
+  id           String              @id @default(uuid())
+  productId    String
+  vehicleId    String              // ID do Vehicle do schema 'public'
+  type         CompatibilityType @default(ORIGINAL)
+  notes        String?
+  isVerified   Boolean             @default(false)
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @updatedAt
+
+  product      Product             @relation(fields: [productId], references: [id], onDelete: Cascade)
+  // Nota: A relação com 'Vehicle' global não é definida diretamente aqui no Prisma.
+  // Ela será gerenciada na sua lógica de aplicação, buscando o Vehicle pelo vehicleId
+  // no schema 'public' e relacionando-o com o Product do schema do inquilino.
+  // Isso requer que seu serviço de PrismaClient para tenants tenha acesso ao PrismaClient global.
+
+  @@map("vehicle_compatibility")
+  @@unique([productId, vehicleId]) // Combinação única dentro do schema do inquilino
+  @@index([productId])
+  @@index([vehicleId]) // Ainda útil para buscas por veículo
+}
+
+enum CompatibilityType {
+  ORIGINAL     // Peça original
+  SIMILAR      // Peça similar/equivalente
+  SUBSTITUTE   // Peça substituta
+}
+
+/// Clientes do Inquilino
+model Customer {
+  id          String       @id @default(uuid())
+  type        CustomerType
+  name        String
+  email       String?      @unique
+  phone       String?
+  document    String       // CPF ou CNPJ
+  ie          String?      // Inscrição Estadual (PJ)
+  address     String?
+  city        String?
+  state       String?
+  zipCode     String?
+  creditLimit Decimal?     @db.Decimal(10,2)
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  vehicles    CustomerVehicle[]
+  sales       Sale[]
+
+  @@map("customers")
+  @@index([document])
+}
+
+enum CustomerType {
+  INDIVIDUAL // Pessoa Física
+  COMPANY    // Pessoa Jurídica
+}
+
+/// Veículos de Clientes (do Inquilino)
+/// Esta tabela também referencia o `Vehicle` global.
+model CustomerVehicle {
+  id          String   @id @default(uuid())
+  customerId  String
+  vehicleId   String   // ID do Vehicle do schema 'public'
+  plate       String?
+  chassis     String?
+  color       String?
+  mileage     Int?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  customer    Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  // Relação lógica com 'Vehicle' global, como em VehicleCompatibility
+  // vehicle   Vehicle @relation(fields: [vehicleId], references: [id]) // Removido para multi-schema
+  @@map("customer_vehicles")
+  @@index([customerId])
+  @@index([plate])
+  @@index([chassis])
+}
+
+/// Fornecedores do Inquilino
+model Supplier {
+  id           String   @id @default(uuid())
+  name         String
+  cnpj         String   @unique
+  ie           String?
+  email        String?
+  phone        String?
+  address      String?
+  city         String?
+  state        String?
+  zipCode      String?
+  paymentTerms String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  products     Product[]
+  purchases    Purchase[]
+
+  @@map("suppliers")
+  @@index([cnpj])
+}
+
+/// Vendas do Inquilino
+model Sale {
+  id            String         @id @default(uuid())
+  companyId     String
+  customerId    String?
+  userId        String
+  saleNumber    String         @unique
+  type          SaleType       @default(SALE)
+  status        SaleStatus     @default(PENDING)
+  subtotal      Decimal        @db.Decimal(10,2)
+  discount      Decimal        @default(0) @db.Decimal(10,2)
+  tax           Decimal        @default(0) @db.Decimal(10,2)
+  total         Decimal        @db.Decimal(10,2)
+  paymentMethod PaymentMethod?
+  notes         String?
+  approvedBy    String?        // ID do usuário que aprovou desconto (do mesmo tenant)
+  approvedAt    DateTime?
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  company       Company?       @relation(fields: [companyId], references: [id])
+  customer      Customer?      @relation(fields: [customerId], references: [id])
+  user          User           @relation(fields: [userId], references: [id])
+  items         SaleItem[]
+  payments      Payment[]
+
+  @@map("sales")
+  @@index([saleNumber])
+  @@index([status])
+  @@index([createdAt])
+}
+
+enum SaleType {
+  QUOTE       // Orçamento
+  SALE        // Venda
+  RETURN      // Devolução
+}
+
+enum SaleStatus {
+  PENDING     // Pendente
+  APPROVED    // Aprovado
+  COMPLETED   // Finalizado
+  CANCELLED   // Cancelado
+}
+
+enum PaymentMethod {
+  CASH        // Dinheiro
+  CREDIT_CARD // Cartão de Crédito
+  DEBIT_CARD  // Cartão de Débito
+  PIX         // PIX
+  BANK_SLIP   // Boleto
+  BANK_TRANSFER // Transferência
+  CHECK       // Cheque
+}
+
+/// Itens de Venda do Inquilino
+model SaleItem {
+  id        String    @id @default(uuid())
+  saleId    String
+  productId String
+  quantity  Int
+  unitPrice Decimal   @db.Decimal(10,2)
+  discount  Decimal   @default(0) @db.Decimal(10,2)
+  total     Decimal   @db.Decimal(10,2)
+  createdAt DateTime  @default(now())
+
+  sale      Sale      @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  product   Product   @relation(fields: [productId], references: [id])
+
+  @@map("sale_items")
+  @@index([saleId])
+}
+
+/// Pagamentos (por inquilino)
+model Payment {
+  id           String        @id @default(uuid())
+  saleId       String?
+  purchaseId   String?
+  type         PaymentType
+  method       PaymentMethod
+  amount       Decimal       @db.Decimal(10,2)
+  dueDate      DateTime?
+  paidDate     DateTime?
+  status       PaymentStatus @default(PENDING)
+  description  String?
+  bankAccount  String?       // ID ou nome da conta bancária
+  reference    String?       // Número do cheque, comprovante, etc.
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  sale         Sale?         @relation(fields: [saleId], references: [id])
+  purchase     Purchase?     @relation(fields: [purchaseId], references: [id])
+
+  @@map("payments")
+  @@index([type])
+  @@index([status])
+  @@index([dueDate])
+}
+
+enum PaymentType {
+  RECEIVABLE  // Conta a Receber
+  PAYABLE     // Conta a Pagar
+}
+
+enum PaymentStatus {
+  PENDING     // Pendente
+  PAID        // Pago
+  OVERDUE     // Vencido
+  CANCELLED   // Cancelado
+}
+
+/// Contas Bancárias (por inquilino)
+model BankAccount {
+  id        String      @id @default(uuid())
+  name      String
+  bank      String
+  agency    String
+  account   String
+  type      AccountType
+  balance   Decimal     @default(0) @db.Decimal(10,2)
+  isActive  Boolean     @default(true)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  @@map("bank_accounts")
+}
+
+enum AccountType {
+  CHECKING    // Conta Corrente
+  SAVINGS     // Poupança
+  INVESTMENT  // Investimento
+}
+
+/// Itens de Inventário (por inquilino e empresa/filial)
+model InventoryItem {
+  id           String       @id @default(uuid())
+  companyId    String
+  productId    String
+  location     String?      // Prateleira/Setor
+  quantity     Int          @default(0)
+  minStock     Int          @default(0)
+  maxStock     Int?
+  avgCost      Decimal      @db.Decimal(10,2)
+  lastMovement DateTime?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  company      Company      @relation(fields: [companyId], references: [id])
+  product      Product      @relation(fields: [productId], references: [id])
+  movements    StockMovement[]
+
+  @@map("inventory_items")
+  @@unique([companyId, productId]) // Um produto único por empresa
+  @@index([productId])
+}
+
+/// Movimentações de Estoque (por inquilino)
+model StockMovement {
+  id          String       @id @default(uuid())
+  inventoryId String
+  type        MovementType
+  quantity    Int
+  unitCost    Decimal?     @db.Decimal(10,2)
+  reference   String?      // Número da venda, compra, etc.
+  reason      String?
+  userId      String?      // Usuário que realizou a movimentação (do mesmo tenant)
+  createdAt   DateTime     @default(now())
+
+  inventory   InventoryItem @relation(fields: [inventoryId], references: [id], onDelete: Cascade)
+
+  @@map("stock_movements")
+  @@index([inventoryId])
+  @@index([type])
+  @@index([createdAt])
+}
+
+enum MovementType {
+  IN          // Entrada
+  OUT         // Saída
+  ADJUSTMENT  // Ajuste
+  TRANSFER    // Transferência
+}
+
+/// Compras (por inquilino)
+model Purchase {
+  id             String         @id @default(uuid())
+  companyId      String
+  supplierId     String
+  userId         String
+  purchaseNumber String         @unique
+  status         PurchaseStatus @default(PENDING)
+  subtotal       Decimal        @db.Decimal(10,2)
+  discount       Decimal        @default(0) @db.Decimal(10,2)
+  tax            Decimal        @default(0) @db.Decimal(10,2)
+  total          Decimal        @db.Decimal(10,2)
+  deliveryDate   DateTime?
+  notes          String?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  company        Company        @relation(fields: [companyId], references: [id])
+  supplier       Supplier       @relation(fields: [supplierId], references: [id])
+  user           User           @relation(fields: [userId], references: [id])
+  items          PurchaseItem[]
+  payments       Payment[]
+
+  @@map("purchases")
+  @@index([purchaseNumber])
+  @@index([status])
+}
+
+enum PurchaseStatus {
+  PENDING     // Pendente
+  APPROVED    // Aprovado
+  RECEIVED    // Recebido
+  CANCELLED   // Cancelado
+}
+
+/// Itens de Compra (por inquilino)
+model PurchaseItem {
+  id         String    @id @default(uuid())
+  purchaseId String
+  productId  String
+  quantity   Int
+  unitCost   Decimal   @db.Decimal(10,2)
+  total      Decimal   @db.Decimal(10,2)
+  received   Int       @default(0)
+  createdAt  DateTime  @default(now())
+
+  purchase   Purchase @relation(fields: [purchaseId], references: [id], onDelete: Cascade)
+  product    Product  @relation(fields: [productId], references: [id])
+
+  @@map("purchase_items")
+  @@index([purchaseId])
+}
+
+/// Configurações Fiscais (por inquilino)
+model TaxConfiguration {
+  id          String   @id @default(uuid())
+  state       String
+  ncm         String
+  cest        String?
+  icmsRate    Decimal? @db.Decimal(5,2)
+  ipiRate     Decimal? @db.Decimal(5,2)
+  pisRate     Decimal? @db.Decimal(5,2)
+  cofinsRate  Decimal? @db.Decimal(5,2)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("tax_configurations")
+  @@unique([state, ncm]) // Único para NCM/Estado dentro do schema do inquilino
+  @@index([ncm])
+}
+
+/// Documentos Fiscais (por inquilino)
+model FiscalDocument {
+  id          String         @id @default(uuid())
+  saleId      String?        // Opcional: link para a venda se for NF de venda
+  type        DocumentType
+  number      String
+  series      String
+  key         String?        // Chave de acesso NFe
+  status      DocumentStatus @default(PENDING)
+  xmlPath     String?
+  pdfPath     String?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  // A relação com Sale é interna ao schema do inquilino
+  sale        Sale?          @relation(fields: [saleId], references: [id])
+
+  @@map("fiscal_documents")
+  @@index([number, series])
+  @@index([key])
+}
+
+enum DocumentType {
+  NFE         // Nota Fiscal Eletrônica
+  NFCE        // Nota Fiscal de Consumidor Eletrônica
+  NFSE        // Nota Fiscal de Serviço Eletrônica
+}
+
+enum DocumentStatus {
+  PENDING     // Pendente
+  AUTHORIZED  // Autorizada
+  CANCELLED   // Cancelada
+  REJECTED    // Rejeitada
+}
