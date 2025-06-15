@@ -32,49 +32,38 @@ datasource db {
 // e modelos compartilhados que não são específicos de um inquilino.
 //
 
-/// Modelo de Tenant (empresa)
-/// Armazena informações de cada empresa/loja que usa o sistema.
 model Tenant {
-  id         String   @id @default(uuid())
-  name       String   @unique            // Nome da empresa ou identificador
-  schemaUrl  String   @unique            // Nome do schema PostgreSQL (ex: tenant_loja12)
-  cnpj       String   @unique
-  email      String
-  phone      String?
-  address    String?
-  city       String?
-  state      String?
-  zipCode    String?
-  logo       String?
-  favicon    String?                      // Favicon personalizado do tenant
-  theme      Json?                      // Configurações de tema personalizadas
-  settings   Json?                      // Configurações gerais do tenant
-  isActive   Boolean  @default(true)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id          String         @id @default(uuid())
+  name        String         @unique
+  schemaUrl   String         @unique
+  cnpj        String         @unique
+  email       String
+  phone       String?
+  address     String?
+  city        String?
+  state       String?
+  zipCode     String?
+  logo        String?
+  favicon     String?
+  theme       Json?
+  settings    Json?
+  isActive    Boolean        @default(true)
+  billingStatus BillingStatus @default(ACTIVE) // Status financeiro
+  paymentDueDate DateTime?   // Data vencimento do pagamento
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
 
-  adminUsers AdminUser[] // Usuários administrativos globais vinculados a este tenant
+  adminUsers  AdminUser[]
 
   @@map("tenants")
-  @@schema("public") // Indica que esta tabela está no schema 'public'
+  @@schema("public")
 }
 
-/// Usuário Administrador (Global)
-/// Usuários que gerenciam tenants ou acessam funcionalidades globais do sistema.
-model AdminUser {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  name      String
-  tenantId  String   // Opcional: Para admins vinculados a um tenant específico (ex: "owner" do tenant)
-  role      String   @default("tenant_admin") // Ex: super_admin, tenant_admin
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-
-  @@map("admin_users")
-  @@schema("public") // Indica que esta tabela está no schema 'public'
+/// Enum de status financeiro do Tenant
+enum BillingStatus {
+  ACTIVE     // Em dia
+  PAST_DUE   // Atrasado
+  SUSPENDED  // Acesso suspenso por inadimplência
 }
 
 /// Modelo de Veículo (Catálogo Global)
