@@ -7,7 +7,7 @@
 // usando schemas distintos por empresa (tenant). O controle de tenants e usuários
 // administrativos ocorre no schema público.
 //
-// Versão: 1.0
+// Versão: 1.1
 //
 // Equipe SmartPeças
 // Criado em: 12/06/2025
