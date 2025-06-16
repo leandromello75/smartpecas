@@ -7,7 +7,7 @@
 // busca suas informações no schema público e injeta no TenantContextService.
 // Garante que apenas tenants ativos e com pagamentos em dia acessem suas APIs.
 //
-// Versão: 1.2
+// Versão: 1.3
 //
 // Equipe SmartPeças
 // Criado em: 15/06/2025
@@ -80,15 +80,15 @@ export class TenantResolveGuard implements CanActivate {
       }
 
       this.tenantContext.setTenant({
-        id: tenant.id,
-        schemaUrl: tenant.schemaUrl,
-        name: tenant.name,
-        cnpj: tenant.cnpj,
-        email: tenant.email,
-        billingStatus: tenant.billingStatus,
-      });
-
-      this.logger.debug(`Contexto do tenant '${tenant.name}' (${tenant.id}) definido.`);
+  id: tenant.id,
+  schemaUrl: tenant.schemaUrl,
+  name: tenant.name,
+  cnpj: tenant.cnpj,
+  email: tenant.email,
+  billingStatus: tenant.billingStatus as 'ACTIVE' | 'PAST_DUE' | 'SUSPENDED',
+});
+      this.logger.debug(`Contexto do tenant '${tenant.name}' (${tenant.id}) definido e validado.`);
+      (request as any).tenantContext = this.tenantContext.getTenantContext();
       return true;
     } catch (error) {
       this.logger.error(
