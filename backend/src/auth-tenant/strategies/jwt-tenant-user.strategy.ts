@@ -1,10 +1,10 @@
 // =============================================================================
-// SmartPeças ERP - Estratégia JWT para Usuários do Inquilino
+// SmartPeças ERP - JwtTenantUserStrategy
 // =============================================================================
 // Arquivo: backend/src/auth-tenant/strategies/jwt-tenant-user.strategy.ts
 //
-// Descrição: Estratégia Passport que valida JWTs de usuários do schema de tenant.
-// Utiliza o schemaUrl do payload para obter o PrismaClient correto.
+// Descrição: Estratégia Passport.js para autenticação de usuários de inquilino
+// via JWT. Valida o token e extrai informações do usuário.
 //
 // Versão: 1.1
 //
@@ -17,10 +17,11 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
-import { JwtTenantUserPayload } from '../interfaces/jwt-tenant-user-payload.interface'; // Crie essa interface se ainda não existir
+import { JwtTenantUserPayload } from '../interfaces/jwt-tenant-user-payload.interface'; // Interface movida para pasta dedicada
 import { User } from '@prisma/client';
 
 @Injectable()
+// Estratégia identificada como 'jwt-tenant-user' (usada nos Guards)
 export class JwtTenantUserStrategy extends PassportStrategy(Strategy, 'jwt-tenant-user') {
   private readonly logger = new Logger(JwtTenantUserStrategy.name);
 
@@ -35,36 +36,34 @@ export class JwtTenantUserStrategy extends PassportStrategy(Strategy, 'jwt-tenan
     });
   }
 
+  /**
+   * Valida o payload do JWT de um usuário de inquilino.
+   * Executado automaticamente pelo Passport após a extração do token.
+   *
+   * @param payload Dados extraídos do JWT
+   * @returns O objeto User validado (sem a senha), anexado a `req.user`
+   * @throws UnauthorizedException se o token for inválido ou o usuário não for encontrado
+   */
   async validate(payload: JwtTenantUserPayload): Promise<Omit<User, 'password'>> {
-    const { sub: userId, email, schemaUrl } = payload;
+    this.logger.debug(`Validando JWT para usuário do tenant: ${payload.email}`);
 
-    if (!schemaUrl) {
-      this.logger.error('Payload JWT sem schemaUrl fornecido.');
-      throw new UnauthorizedException('Token inválido: schema do tenant ausente.');
-    }
-
-    this.logger.debug(`Validando JWT para usuário: ${email} no schema: ${schemaUrl}`);
-
-    const tenantPrisma = await this.prismaService.getTenantClient(schemaUrl);
+    const tenantPrisma = await this.prismaService.getTenantClient(payload.schemaUrl);
 
     const user = await tenantPrisma.user.findUnique({
-      where: { id: userId },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-        isActive: true,
-        createdAt: true,
-        updatedAt: true,
+      where: {
+        id: payload.sub,
+        email: payload.email,
       },
     });
 
     if (!user || !user.isActive) {
-      this.logger.warn(`Usuário inativo ou inexistente [${email}] no schema '${schemaUrl}'`);
-      throw new UnauthorizedException('Token JWT inválido ou usuário não autorizado.');
+      this.logger.warn(
+        `JWT inválido ou usuário não encontrado para tenant '${payload.tenantId}': ${payload.email}`,
+      );
+      throw new UnauthorizedException('Token JWT inválido ou usuário inativo.');
     }
 
-    return user;
+    const { password, ...userWithoutPassword } = user;
+    return userWithoutPassword;
   }
 }
