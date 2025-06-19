@@ -98,7 +98,7 @@ chmod +x setup_server.sh
 2. Deploy do Projeto
 ssh smartpecas@SEU_IP
 cd /var/www/smartpecas
-git clone [URL_DO_SEU_REPOSITORIO] .
+git clone https://github.com/leandromello75/smartpecas
 
 3. Configure o ambiente
 cp .env.example .env
