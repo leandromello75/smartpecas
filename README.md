@@ -49,7 +49,7 @@ O SmartPeças ERP nasceu da necessidade de uma ferramenta robusta, inteligente e
 
 ## 📂 Estrutura do Projeto
 
-<pre lang="text"> <code> smartpecas/ ├── backend/ │ ├── Dockerfile │ └── ... ├── prisma/ │ └── schema.prisma ├── frontend/ # (Planejado) ├── .dockerignore ├── .env.example ├── docker-compose.yml ├── setup_server.sh └── README.md </code> </pre>
+<pre> ```text smartpecas/ ├── backend/ │ ├── Dockerfile │ └── ... ├── prisma/ │ └── schema.prisma ├── frontend/ # (Planejado) ├── .dockerignore ├── .env.example ├── docker-compose.yml ├── setup_server.sh └── README.md ``` </pre>
 ## 🏁 Começando
 
 ### Pré-requisitos
