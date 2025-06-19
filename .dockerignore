@@ -1,0 +1,51 @@
+# =============================================================================
+# SmartPeças ERP - .dockerignore
+# =============================================================================
+# Arquivo: /smartpecas/.dockerignore
+#
+# Descrição: Impede que arquivos e diretórios desnecessários sejam enviados
+# ao contexto de build Docker. Mantém os builds leves, seguros e eficientes.
+#
+# Versão: 1.0
+# =============================================================================
+
+# 🔒 Arquivos de ambiente
+.env
+.env.*             # Suporta múltiplos ambientes (.env.dev, .env.prod, etc)
+
+# 📦 Dependências locais (serão instaladas no container)
+**/node_modules
+
+# 🏗️ Builds locais (serão gerados no container)
+**/dist
+**/.turbo
+**/.next
+**/build
+
+# 🧪 Testes e cobertura (não necessários em produção)
+**/__tests__/
+**/test/
+**/tests/
+**/coverage/
+
+# 🪵 Logs e arquivos temporários
+*.log
+npm-debug.log
+yarn-error.log
+
+# 💾 Backups e arquivos temporários
+*.bak
+*.swp
+*.tmp
+
+# ⚙️ Configurações de IDEs e caches
+.vscode/
+.idea/
+.cache/
+
+# 🔄 Versionamento e controle
+.git
+.gitignore
+
+# 🐳 Arquivos Docker locais opcionais (não ignore os que são necessários)
+docker-compose.override.yml
