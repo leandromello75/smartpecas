@@ -110,10 +110,13 @@ docker compose exec backend npx prisma migrate deploy
 
 🛠️ Comandos Úteis (Admin)
 Comando	Função
-docker compose ps	Verifica os serviços ativos
-docker compose logs -f backend	Verifica os logs do backend
-docker compose down	Derruba todos os contêineres
-docker compose exec db psql ...	Abre o terminal SQL no banco (PostgreSQL)
+| Comando                           | Função                                    |
+| --------------------------------- | ----------------------------------------- |
+| `docker compose ps`               | Verifica os serviços ativos               |
+| `docker compose logs -f backend`  | Verifica os logs do backend               |
+| `docker compose down`             | Derruba todos os contêineres              |
+| `docker compose exec db psql ...` | Abre o terminal SQL no banco (PostgreSQL) |
+
 
 ⚠️ Em produção, não use bind mounts (volumes: ./backend:/app). A imagem já contém todos os artefatos necessários.
 
