@@ -49,8 +49,6 @@ O SmartPeças ERP nasceu da necessidade de uma ferramenta robusta, inteligente e
 
 ## 📂 Estrutura do Projeto
 
-## 📂 Estrutura do Projeto
-
 ```text
 smartpecas/
 ├── backend/
@@ -65,6 +63,7 @@ smartpecas/
 ├── setup_server.sh
 └── README.md
 ```
+---
 
 ## 🏁 Começando
 
