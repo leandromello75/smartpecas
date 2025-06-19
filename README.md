@@ -2,8 +2,24 @@
 
 ![Status do Projeto](https://img.shields.io/badge/status-em%20desenvolvimento-yellowgreen)
 ![Licença](https://img.shields.io/badge/licen%C3%A7a-propriet%C3%A1ria-red)
+![Docker](https://img.shields.io/badge/docker-ready-blue)
 
 Um sistema de gestão (ERP) moderno, na nuvem e focado no setor de autopeças. O SmartPeças foi projetado para ser uma plataforma multi-tenant, utilizando inteligência artificial para otimizar processos e impulsionar o crescimento do seu negócio.
+
+---
+
+## 📋 Tabela de Conteúdos
+
+1. [Sobre o Projeto](#-sobre-o-projeto)
+2. [Tecnologias Utilizadas](#-tecnologias-utilizadas)
+3. [Estrutura do Projeto](#-estrutura-do-projeto)
+4. [Começando (Desenvolvimento Local)](#-começando)
+5. [Implantação (Produção)](#-implantação-em-produção)
+6. [Comandos Úteis](#-comandos-úteis-admin)
+7. [Contato](#-contato)
+8. [Licença](#-licença)
+
+---
 
 ## 🚀 Sobre o Projeto
 
@@ -11,70 +27,99 @@ O SmartPeças ERP nasceu da necessidade de uma ferramenta robusta, inteligente e
 
 ### ✨ Principais Funcionalidades
 
-* **Multi-Tenancy**: Arquitetura preparada para operar com múltiplas empresas de forma segura e isolada.
-* **Gestão de Produtos**: Cadastro detalhado de peças, com NCM/CEST e controle de compatibilidade veículo-peça.
-* **Controle de Estoque Inteligente**: Previsão de demanda com IA, alertas de reposição e rastreamento completo de movimentações.
-* **Frente de Caixa (PDV)**: Módulo de vendas ágil e otimizado para o balcão de autopeças.
-* **Financeiro Completo**: Contas a pagar e receber, fluxo de caixa e conciliação bancária.
-* **Módulo Fiscal**: Emissão de NF-e/NFC-e e cálculo automático de impostos.
-* **Relatórios e Dashboards**: Visualização de dados para tomada de decisões estratégicas.
+* **Multi-Tenancy**: Operação segura e isolada para múltiplas empresas.
+* **Gestão de Produtos**: Cadastro detalhado, NCM/CEST e compatibilidade peça-veículo.
+* **Estoque Inteligente**: Previsão de demanda, alertas e rastreamento completo.
+* **Frente de Caixa (PDV)**: Vendas otimizadas para balcão.
+* **Financeiro**: Contas, fluxo de caixa e conciliação bancária.
+* **Fiscal**: Emissão de NF-e/NFC-e e cálculo automático de impostos.
+* **Relatórios e Dashboards**: Dados para decisões estratégicas.
+
+---
 
 ## 🛠️ Tecnologias Utilizadas
 
-O projeto foi construído com as tecnologias mais modernas do ecossistema JavaScript/TypeScript, garantindo uma base sólida e performática.
-
 * **Backend**: Node.js, NestJS, TypeScript
-* **Banco de Dados**: PostgreSQL
+* **Banco de Dados**: PostgreSQL (multi-schema)
 * **ORM**: Prisma
 * **Frontend**: React (Planejado)
-* **Ambiente de Desenvolvimento**: Docker
+* **Infraestrutura / DevOps**: Docker, Docker Compose, Nginx
+
+---
+
+## 📂 Estrutura do Projeto
+
+/smartpecas
+├── backend/
+│ ├── Dockerfile
+│ └── ...
+├── prisma/
+│ └── schema.prisma
+├── frontend/ # (Planejado)
+├── .dockerignore
+├── .env.example
+├── docker-compose.yml
+├── setup_server.sh
+└── README.md
 
 ## 🏁 Começando
 
-Siga os passos abaixo para configurar e executar o ambiente de desenvolvimento localmente.
-
 ### Pré-requisitos
 
-* [Docker](https://www.docker.com/products/docker-desktop/) e Docker Compose
+* [Docker + Docker Compose](https://docs.docker.com/engine/install/)
 * [Git](https://git-scm.com/)
-* Um editor de código, como o [VS Code](https://code.visualstudio.com/)
+* [Node.js](https://nodejs.org/) (v18 ou superior, opcional para dev local)
 
 ### Instalação
 
-1.  **Clone o repositório:**
-    ```bash
-    git clone <URL-DO-SEU-REPOSITORIO>
-    cd SmartPecas
-    ```
+1. **Clone o repositório:**
+   ```bash
+   git clone [URL_DO_SEU_REPOSITORIO]
+   cd smartpecas
+Crie o arquivo .env:
+cp .env.example .env
 
-2.  **Crie o arquivo de configuração na raiz:**
-    Crie um arquivo chamado `.env` na pasta raiz do projeto (`/SmartPecas/`) com o seguinte conteúdo:
-    ```env
-    # Variáveis para o Docker Compose usar
-    POSTGRES_USER=docker
-    POSTGRES_PASSWORD=postgres
-    POSTGRES_DB=smartpecas_dev
-    ```
+Suba os contêineres:
+docker compose up --build -d
 
-3.  **Suba os contêineres Docker:**
-    Este comando irá construir as imagens e iniciar os serviços da API e do banco de dados.
-    ```bash
-    docker-compose up --build -d
-    ```
+Execute a migração inicial:
+docker compose exec backend npx prisma migrate dev --name init
 
-4.  **Execute a migração do banco de dados:**
-    Este comando cria todas as tabelas no banco de dados.
-    ```bash
-    docker-compose exec api npx prisma migrate dev
-    ```
+Acesse:
+http://localhost:3000
 
-5.  **Pronto!**
-    O servidor da API estará rodando em `http://localhost:3000`.
+🏭 Implantação em Produção
+1. Preparação do Servidor (Ubuntu 20.04)
+Execute o script setup_server.sh no servidor:
+wget https://raw.githubusercontent.com/smartpecas/setup_server.sh
+chmod +x setup_server.sh
+./setup_server.sh
 
-## 📄 Licença
+2. Deploy do Projeto
+ssh smartpecas@SEU_IP
+cd /var/www/smartpecas
+git clone [URL_DO_SEU_REPOSITORIO] .
 
-Este projeto é distribuído sob uma licença proprietária. Veja o arquivo `LICENSE` para mais detalhes.
+3. Configure o ambiente
+cp .env.example .env
+nano .env
 
-## 📧 Contato
+4. Suba os serviços
+docker compose up --build -d
+docker compose exec backend npx prisma migrate deploy
 
-**SmartPeças Team** - contato@smartpecas.com.br
+🛠️ Comandos Úteis (Admin)
+Comando	Função
+docker compose ps	Verifica os serviços ativos
+docker compose logs -f backend	Verifica os logs do backend
+docker compose down	Derruba todos os contêineres
+docker compose exec db psql ...	Abre o terminal SQL no banco (PostgreSQL)
+
+⚠️ Em produção, não use bind mounts (volumes: ./backend:/app). A imagem já contém todos os artefatos necessários.
+
+📧 Contato
+SmartPeças Team – contato@smartpecas.com.br
+
+📄 Licença
+Este projeto é distribuído sob uma licença proprietária.
+Consulte o arquivo LICENSE para mais detalhes.
