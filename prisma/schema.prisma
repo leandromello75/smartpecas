@@ -41,6 +41,8 @@ model AdminUser {
   email     String   @unique
   password  String
   name      String?
+  role      String?  // ✅ ADICIONADO
+  isActive  Boolean  @default(true) // ✅ ADICIONADO
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   tenantId  String
@@ -49,7 +51,6 @@ model AdminUser {
   @@map("admin_users")
   @@schema("public")
 }
-
 // =============================================================================
 // === Modelos ESPECÍFICOS DO TENANT (mapeados para o schema placeholder) ===
 // =============================================================================
