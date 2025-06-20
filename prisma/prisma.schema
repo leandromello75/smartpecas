@@ -9,71 +9,63 @@
 // =============================================================================
 
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
   previewFeatures = ["multiSchema"]
 }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  schemas  = ["public"] // <-- ADICIONE ESTA LINHA
+  // ✅ ADICIONAMOS um schema "placeholder" para validação do build.
+  schemas  = ["public", "tenant_template"] 
 }
 
 // =============================================================================
 // === Modelos GLOBAIS (vivem no schema "public") ===
 // =============================================================================
-// Estes modelos são compartilhados por toda a aplicação e gerenciam os tenants.
 
 model Tenant {
-  id        String   @id @default(uuid())
-  name      String   @unique // Nome fantasia da empresa/tenant
-  schema    String   @unique // O nome do schema no PostgreSQL para este tenant (ex: "tenant_empresa_abc")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relação com os usuários administradores deste tenant
+  id         String      @id @default(uuid())
+  name       String      @unique
+  schema     String      @unique
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
   adminUsers AdminUser[]
 
   @@map("tenants")
-  @@schema("public") // Define que esta tabela pertence ao schema 'public'
+  @@schema("public")
 }
 
 model AdminUser {
   id        String   @id @default(uuid())
   email     String   @unique
-  password  String   // Lembre-se de sempre fazer o hash desta senha!
+  password  String
   name      String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  // Relação de volta para o Tenant ao qual este admin pertence
   tenantId  String
   tenant    Tenant   @relation(fields: [tenantId], references: [id])
 
   @@map("admin_users")
-  @@schema("public") // Admins também vivem no schema público
+  @@schema("public")
 }
 
-
 // =============================================================================
-// === Modelos ESPECÍFICOS DO TENANT (vivem em schemas dinâmicos) ===
+// === Modelos ESPECÍFICOS DO TENANT (mapeados para o schema placeholder) ===
 // =============================================================================
-// Estes modelos serão replicados dentro do schema de cada tenant.
-// Eles NÃO possuem a diretiva @@schema, pois o schema será definido em tempo de execução.
 
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
   password  String
   name      String?
-  role      String   @default("user") // Ex: "manager", "sales", "stock_keeper"
+  role      String   @default("user")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  // Não há 'tenantId' aqui, o isolamento é feito pelo schema.
   orders    Order[]
 
   @@map("users")
+  @@schema("tenant_template") // ✅ ADICIONADO
 }
 
 model Product {
@@ -81,13 +73,13 @@ model Product {
   name        String
   description String?
   price       Decimal     @db.Decimal(10, 2)
-  sku         String?     @unique // Stock Keeping Unit
+  sku         String?     @unique
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
-  
   orderItems  OrderItem[]
 
   @@map("products")
+  @@schema("tenant_template") // ✅ ADICIONADO
 }
 
 model Customer {
@@ -98,42 +90,39 @@ model Customer {
   address   String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
   orders    Order[]
 
   @@map("customers")
+  @@schema("tenant_template") // ✅ ADICIONADO
 }
 
 model Order {
   id          String      @id @default(uuid())
   orderDate   DateTime    @default(now())
   totalAmount Decimal     @db.Decimal(10, 2)
-  status      String      @default("pending") // "pending", "completed", "cancelled"
+  status      String      @default("pending")
   createdAt   DateTime    @default(now())
   updatedAt   DateTime    @updatedAt
-
   customerId  String
   customer    Customer    @relation(fields: [customerId], references: [id])
-  
   userId      String
   user        User        @relation(fields: [userId], references: [id])
-  
   items       OrderItem[]
 
   @@map("orders")
+  @@schema("tenant_template") // ✅ ADICIONADO
 }
 
 model OrderItem {
-  id        String   @id @default(uuid())
+  id        String  @id @default(uuid())
   quantity  Int
-  unitPrice Decimal  @db.Decimal(10, 2) // Preço do produto no momento da compra
-  
+  unitPrice Decimal @db.Decimal(10, 2)
   orderId   String
-  order     Order    @relation(fields: [orderId], references: [id])
-
+  order     Order   @relation(fields: [orderId], references: [id])
   productId String
-  product   Product  @relation(fields: [productId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
 
   @@map("order_items")
-  @@unique([orderId, productId]) // Garante que um produto só apareça uma vez por pedido
-}
+  @@unique([orderId, productId])
+  @@schema("tenant_template") // ✅ ADICIONADO
+} 
