@@ -15,9 +15,9 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL") // Esta variável será lida do .env
+  url      = env("DATABASE_URL")
+  schemas  = ["public"] // <-- ADICIONE ESTA LINHA
 }
-
 
 // =============================================================================
 // === Modelos GLOBAIS (vivem no schema "public") ===
