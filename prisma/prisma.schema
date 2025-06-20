@@ -53,6 +53,23 @@ model Tenant {
   createdAt   DateTime       @default(now())
   updatedAt   DateTime       @updatedAt
 
+// Adicione este modelo ao seu schema.prisma
+
+model AdminUser {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String   // Lembre-se de sempre fazer o hash desta senha!
+  name      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relação de volta para o Tenant (o admin pertence a um tenant)
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+
+  @@map("admin_users")
+}
+  
   adminUsers  AdminUser[]
 
   @@map("tenants")
