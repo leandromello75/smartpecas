@@ -1,16 +1,11 @@
 // =============================================================================
-// SmartPeças ERP - Schema Prisma (Versão Consolidada)
+// SmartPeças ERP - Schema Prisma
 // =============================================================================
-// Arquivo: /backend/prisma/schema.prisma
-//
-// Descrição: Estrutura unificada com suporte a multi-tenancy real via PostgreSQL
-// usando schemas distintos por empresa (tenant). O controle de tenants e usuários
-// administrativos ocorre no schema público.
-//
 // Versão: 1.0.0
+// Data: 19/06/2025
 //
-// Equipe SmartPeças
-// Criado em: 12/06/2025
+// Descrição: Schema de banco de dados para o SmartPeças ERP, utilizando
+// uma arquitetura multi-tenant com múltiplos schemas no PostgreSQL.
 // =============================================================================
 
 generator client {
@@ -19,17 +14,19 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL") // Esta variável será lida do .env pelo Docker Compose
+  url      = env("DATABASE_URL") // Esta variável será lida do .env
 }
 
+
 // =============================================================================
-// Modelos GLOBAIS (vivem no schema "public")
+// === Modelos GLOBAIS (vivem no schema "public") ===
 // =============================================================================
+// Estes modelos são compartilhados por toda a aplicação e gerenciam os tenants.
 
 model Tenant {
   id        String   @id @default(uuid())
-  name      String   @unique
-  schema    String   @unique // O nome do schema no PostgreSQL para este tenant
+  name      String   @unique // Nome fantasia da empresa/tenant
+  schema    String   @unique // O nome do schema no PostgreSQL para este tenant (ex: "tenant_empresa_abc")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -37,18 +34,18 @@ model Tenant {
   adminUsers AdminUser[]
 
   @@map("tenants")
-  @@schema("public")
+  @@schema("public") // Define que esta tabela pertence ao schema 'public'
 }
 
 model AdminUser {
   id        String   @id @default(uuid())
   email     String   @unique
-  password  String
+  password  String   // Lembre-se de sempre fazer o hash desta senha!
   name      String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Relação de volta para o Tenant
+  // Relação de volta para o Tenant ao qual este admin pertence
   tenantId  String
   tenant    Tenant   @relation(fields: [tenantId], references: [id])
 
@@ -58,33 +55,84 @@ model AdminUser {
 
 
 // =============================================================================
-// Modelos ESPECÍFICOS DO TENANT (vivem em schemas dinâmicos)
+// === Modelos ESPECÍFICOS DO TENANT (vivem em schemas dinâmicos) ===
 // =============================================================================
-// Estes modelos não precisam do atributo @@schema(), pois o Prisma
-// irá apontar para o schema correto em tempo de execução.
+// Estes modelos serão replicados dentro do schema de cada tenant.
+// Eles NÃO possuem a diretiva @@schema, pois o schema será definido em tempo de execução.
 
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
   password  String
   name      String?
-  role      String   @default("user") // Ex: "manager", "sales", "stock"
+  role      String   @default("user") // Ex: "manager", "sales", "stock_keeper"
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  // Não há 'tenantId' aqui, o isolamento é feito pelo schema.
+  orders    Order[]
 
   @@map("users")
 }
 
 model Product {
-  id          String   @id @default(uuid())
+  id          String      @id @default(uuid())
   name        String
   description String?
-  price       Decimal  @db.Decimal(10, 2)
-  sku         String?  @unique
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  price       Decimal     @db.Decimal(10, 2)
+  sku         String?     @unique // Stock Keeping Unit
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  
+  orderItems  OrderItem[]
 
   @@map("products")
 }
 
-// Adicione outros modelos específicos do tenant aqui...
+model Customer {
+  id        String   @id @default(uuid())
+  name      String
+  email     String?  @unique
+  phone     String?
+  address   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orders    Order[]
+
+  @@map("customers")
+}
+
+model Order {
+  id          String      @id @default(uuid())
+  orderDate   DateTime    @default(now())
+  totalAmount Decimal     @db.Decimal(10, 2)
+  status      String      @default("pending") // "pending", "completed", "cancelled"
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  customerId  String
+  customer    Customer    @relation(fields: [customerId], references: [id])
+  
+  userId      String
+  user        User        @relation(fields: [userId], references: [id])
+  
+  items       OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String   @id @default(uuid())
+  quantity  Int
+  unitPrice Decimal  @db.Decimal(10, 2) // Preço do produto no momento da compra
+  
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id])
+
+  productId String
+  product   Product  @relation(fields: [productId], references: [id])
+
+  @@map("order_items")
+  @@unique([orderId, productId]) // Garante que um produto só apareça uma vez por pedido
+}
