@@ -21,11 +21,11 @@ export class LoginTenantUserDto {
   @ApiProperty({ example: 'usuario@empresa.com', description: 'E-mail do usuário do inquilino' })
   @IsEmail({}, { message: 'E-mail inválido.' })
   @IsNotEmpty({ message: 'E-mail é obrigatório.' })
-  email: string;
+  email!: string;
 
   @ApiProperty({ example: 'minhaSenhaSegura', description: 'Senha de acesso (mínimo 6 caracteres)' })
   @IsString({ message: 'A senha deve ser uma string.' })
   @IsNotEmpty({ message: 'A senha é obrigatória.' })
   @MinLength(6, { message: 'A senha deve ter pelo menos 6 caracteres.' })
-  password: string;
+  password!: string;
 }

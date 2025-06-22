@@ -6,10 +6,18 @@
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
-    "target": "ES2021",
+    "esModuleInterop": true,
+    "target": "ES2022",
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
+    "paths": {
+      "@/jwt/*": ["src/types/jwt/*"],
+      "@/types/*": ["src/types/*"],
+      "@/common/*": ["src/common/*"],
+      "@prisma-public": ["../node_modules/@prisma/client"],
+      "@prisma-tenant": ["../node_modules/@prisma/tenant-client"]
+    },
     "incremental": true,
     "strict": true,
     "skipLibCheck": true

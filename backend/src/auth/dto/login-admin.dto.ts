@@ -20,11 +20,11 @@ export class LoginAdminDto {
   @ApiProperty({ example: 'admin@smartpecas.com', description: 'E-mail do administrador global' })
   @IsEmail({}, { message: 'E-mail inválido.' })
   @IsNotEmpty({ message: 'E-mail é obrigatório.' })
-  email: string;
+  email!: string;
 
   @ApiProperty({ example: 'senhaSegura123', description: 'Senha de acesso (mínimo 6 caracteres)' })
   @IsString({ message: 'A senha deve ser uma string.' })
   @IsNotEmpty({ message: 'A senha é obrigatória.' })
   @MinLength(6, { message: 'A senha deve ter pelo menos 6 caracteres.' })
-  password: string;
+  password!: string;
 }

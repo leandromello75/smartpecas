@@ -17,7 +17,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
-import { JwtTenantUserPayload } from '../interfaces/jwt-tenant-user-payload.interface'; // Interface movida para pasta dedicada
+import { JwtTenantUserPayload } from '../../types/jwt/jwt-tenant-user-payload.interface'; // Interface movida para pasta dedicada
 import { User } from '@prisma/client';
 
 @Injectable()

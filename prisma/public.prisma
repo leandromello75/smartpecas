@@ -1,0 +1,56 @@
+// =============================================================================
+// SmartPeças ERP - Schema Prisma (Modelos Públicos)
+// =============================================================================
+// Versão: 2.0
+// Data: 21/06/2025
+//
+// Descrição: Define os modelos globais que vivem no schema 'public'.
+// =============================================================================
+
+generator client {
+  // Este é o gerador para o cliente padrão do schema público.
+  // A saída será em 'node_modules/@prisma/client' por padrão.
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =============================================================================
+// === Modelos GLOBAIS (schema "public") ===
+// =============================================================================
+
+model Tenant {
+  id            String   @id @default(uuid())
+  name          String
+  // ✅ O campo 'schema' é CRÍTICO. É ele que a aplicação usará para
+  // saber a qual banco de dados do tenant se conectar.
+  schema        String   @unique
+  cnpj          String?  @unique
+  isActive      Boolean  @default(true)
+  billingStatus String   @default("ACTIVE")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  adminUsers AdminUser[]
+
+  @@map("tenants")
+}
+
+model AdminUser {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String?
+  role      String?  @default("admin")
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+
+  @@map("admin_users")
+}

@@ -1,0 +1,102 @@
+// =============================================================================
+// SmartPeças ERP - Schema Prisma (Modelos de Tenant)
+// =============================================================================
+// Versão: 2.0
+// Data: 21/06/2025
+//
+// Descrição: Define o template dos modelos que existirão em cada schema
+// de tenant.
+// =============================================================================
+
+generator tenant_client {
+  // ✅ MUITO IMPORTANTE: Damos um nome diferente ao gerador e especificamos
+  // uma pasta de saída customizada para não sobrescrever o cliente público.
+  provider = "prisma-client-js"
+  output   = "../node_modules/@prisma/tenant-client"
+}
+
+datasource db {
+  // O datasource é o mesmo, pois apontamos para o mesmo banco de dados.
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =============================================================================
+// === Modelos ESPECÍFICOS DO TENANT ===
+// =============================================================================
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String?
+  role      String   @default("user")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  orders    Order[]
+
+  @@map("users")
+}
+
+model Product {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  price       Decimal   @db.Decimal(10, 2)
+  sku         String?   @unique
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  
+  orderItems  OrderItem[]
+
+  @@map("products")
+}
+
+model Customer {
+  id        String   @id @default(uuid())
+  name      String
+  email     String?  @unique
+  phone     String?
+  address   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  orders    Order[]
+
+  @@map("customers")
+}
+
+model Order {
+  id          String   @id @default(uuid())
+  orderDate   DateTime @default(now())
+  totalAmount Decimal  @db.Decimal(10, 2)
+  status      String   @default("pending")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  customerId  String
+  customer    Customer @relation(fields: [customerId], references: [id])
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  
+  items       OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  quantity  Int
+  unitPrice Decimal @db.Decimal(10, 2)
+  
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id])
+  
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@map("order_items")
+  @@unique([orderId, productId])
+}
