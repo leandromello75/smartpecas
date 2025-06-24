@@ -1,6 +1,5 @@
+import { Request } from 'express';
 import { TenantContext } from '../tenant-context/tenant-context.service';
-declare module 'express' {
-    interface Request {
-        tenantContext?: TenantContext;
-    }
+export interface RequestWithTenant extends Request {
+    tenant: TenantContext;
 }

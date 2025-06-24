@@ -1,15 +1,12 @@
 // =============================================================================
-// SmartPeças ERP - AuthTenantController
+// SmartPeças ERP - AuthTenantController (VERSÃO FINAL CORRIGIDA)
 // =============================================================================
 // Arquivo: backend/src/auth-tenant/auth-tenant.controller.ts
 //
 // Descrição: Controlador responsável pelo login de usuários vinculados a um
 // inquilino (empresa), utilizando autenticação baseada em JWT.
 //
-// Versão: 3.0
-//
-// Equipe SmartPeças
-// Criado em: 17/06/2025 - Atualizado:21/06/22025
+// Versão: 2.1
 // =============================================================================
 
 import {
@@ -24,7 +21,11 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthTenantService } from './auth-tenant.service';
-import { Prisma } from '@prisma/client';
+
+// Importando o tipo 'User' do cliente tenant via alias.
+import { User } from '@/tenant-client';
+
+// Importando o tipo 'Request' do Express para tipagem correta.
 import { Request as ExpressRequest } from 'express';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
@@ -42,7 +43,8 @@ export class AuthTenantController {
   @ApiResponse({ status: 200, description: 'Login bem-sucedido.' })
   @ApiResponse({ status: 401, description: 'Credenciais inválidas.' })
   async login(@Request() req: ExpressRequest) {
-    const user = req.user as Omit<Prisma.User, 'password'>;
+    // ✅ CORREÇÃO: A tipagem de 'user' agora funciona pois 'User' foi importado corretamente.
+    const user = req.user as Omit<User, 'password'>;
 
     if (!user) {
       this.logger.error('AuthGuard falhou em anexar o usuário à requisição.');

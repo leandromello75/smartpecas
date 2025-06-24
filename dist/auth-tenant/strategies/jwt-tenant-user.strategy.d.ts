@@ -1,7 +1,6 @@
 import { Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
-import { JwtTenantUserPayload } from '../interfaces/jwt-tenant-user-payload.interface';
 import { Prisma } from '@prisma/client';
 declare const JwtTenantUserStrategy_base: new (...args: any[]) => Strategy;
 export declare class JwtTenantUserStrategy extends JwtTenantUserStrategy_base {

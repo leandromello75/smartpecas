@@ -11,11 +11,13 @@ exports.TenantContextService = void 0;
 const common_1 = require("@nestjs/common");
 const async_hooks_1 = require("async_hooks");
 let TenantContextService = TenantContextService_1 = class TenantContextService {
-    logger = new common_1.Logger(TenantContextService_1.name);
-    asyncLocalStorage = new async_hooks_1.AsyncLocalStorage();
-    setTenant(tenantContext) {
-        this.logger.debug(`Definindo contexto do tenant: ${tenantContext.id} (${tenantContext.schemaUrl})`);
-        this.asyncLocalStorage.enterWith(tenantContext);
+    constructor() {
+        this.logger = new common_1.Logger(TenantContextService_1.name);
+        this.asyncLocalStorage = new async_hooks_1.AsyncLocalStorage();
+    }
+    run(context, fn) {
+        this.logger.debug(`Iniciando contexto para Tenant ID: ${context.id} (${context.schemaUrl})`);
+        return this.asyncLocalStorage.run(context, fn);
     }
     getTenantContext() {
         const store = this.asyncLocalStorage.getStore();
@@ -26,16 +28,13 @@ let TenantContextService = TenantContextService_1 = class TenantContextService {
         return store;
     }
     get tenantId() {
-        return this.asyncLocalStorage.getStore()?.id;
+        return this.getTenantContext().id;
     }
     get tenantSchemaUrl() {
-        return this.asyncLocalStorage.getStore()?.schemaUrl;
+        return this.getTenantContext().schemaUrl;
     }
     get billingStatus() {
-        return this.asyncLocalStorage.getStore()?.billingStatus;
-    }
-    disable() {
-        this.asyncLocalStorage.disable();
+        return this.getTenantContext().billingStatus;
     }
 };
 exports.TenantContextService = TenantContextService;

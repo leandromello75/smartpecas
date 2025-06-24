@@ -18,37 +18,36 @@ const common_1 = require("@nestjs/common");
 const auth_service_1 = require("./auth.service");
 const swagger_1 = require("@nestjs/swagger");
 const login_admin_dto_1 = require("./dto/login-admin.dto");
-const local_auth_guard_1 = require("./guards/local-auth.guard");
+const passport_1 = require("@nestjs/passport");
 let AuthController = AuthController_1 = class AuthController {
-    authService;
-    logger = new common_1.Logger(AuthController_1.name);
     constructor(authService) {
         this.authService = authService;
+        this.logger = new common_1.Logger(AuthController_1.name);
     }
     async loginAdmin(req, res) {
-        this.logger.log(`Tentativa de login de administrador para: ${req.user.email}`);
-        const result = await this.authService.loginAdmin(req.user);
+        const user = req.user;
+        if (!user) {
+            throw new common_1.UnauthorizedException('Falha no processo de autenticação do guard.');
+        }
+        this.logger.log(`Login bem-sucedido para administrador: ${user.email}`);
+        const result = await this.authService.loginAdmin(user);
+        res.cookie('jwt_admin', result.access_token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+        });
         return result;
     }
 };
 exports.AuthController = AuthController;
 __decorate([
+    (0, common_1.UseGuards)((0, passport_1.AuthGuard)('local-admin')),
     (0, common_1.Post)('login/admin'),
     (0, common_1.HttpCode)(common_1.HttpStatus.OK),
-    (0, common_1.UseGuards)(local_auth_guard_1.LocalAuthGuard),
     (0, swagger_1.ApiOperation)({ summary: 'Login de administrador global do sistema' }),
-    (0, swagger_1.ApiResponse)({
-        status: 200,
-        description: 'Login bem-sucedido. Retorna token JWT.',
-        schema: {
-            type: 'object',
-            properties: {
-                access_token: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
-            },
-        },
-    }),
+    (0, swagger_1.ApiBody)({ type: login_admin_dto_1.LoginAdminDto }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Login bem-sucedido. Retorna token JWT.' }),
     (0, swagger_1.ApiResponse)({ status: 401, description: 'Credenciais inválidas.' }),
-    (0, swagger_1.ApiBody)({ type: login_admin_dto_1.LoginAdminDto, description: 'Credenciais de login do administrador' }),
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Res)({ passthrough: true })),
     __metadata("design:type", Function),

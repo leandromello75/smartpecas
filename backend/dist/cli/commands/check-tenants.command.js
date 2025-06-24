@@ -15,11 +15,10 @@ const nest_commander_1 = require("nest-commander");
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../prisma/prisma.service");
 let CheckTenantsCommand = CheckTenantsCommand_1 = class CheckTenantsCommand extends nest_commander_1.CommandRunner {
-    prisma;
-    logger = new common_1.Logger(CheckTenantsCommand_1.name);
     constructor(prisma) {
         super();
         this.prisma = prisma;
+        this.logger = new common_1.Logger(CheckTenantsCommand_1.name);
     }
     async run() {
         this.logger.log('🔍 Iniciando verificação de schemas de tenants...');
@@ -29,7 +28,7 @@ let CheckTenantsCommand = CheckTenantsCommand_1 = class CheckTenantsCommand exte
         for (const tenant of tenants) {
             try {
                 const client = await this.prisma.getTenantClient(tenant.schemaUrl);
-                const res = await client.$queryRawUnsafe(`SELECT 1;`);
+                await client.$queryRawUnsafe(`SELECT 1;`);
                 this.logger.log(`✅ Tenant '${tenant.name}' conectado com sucesso. Schema: ${tenant.schemaUrl}`);
                 success++;
             }

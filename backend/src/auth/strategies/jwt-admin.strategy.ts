@@ -1,57 +1,54 @@
 // =============================================================================
-// SmartPeças ERP - JwtAdminStrategy
+// SmartPeças ERP - JwtAdminStrategy (VERSÃO FINAL CORRIGIDA)
 // =============================================================================
 // Arquivo: backend/src/auth/strategies/jwt-admin.strategy.ts
-//
-// Descrição: Estratégia JWT para autenticação de administradores globais do
-// sistema. Valida o token e carrega o usuário do schema público.
-//
-// Versão: 2.2
-//
-// Equipe SmartPeças
-// Criado em: 15/06/2025 Altereado: 21/06/2025
+// Versão: 2.3
 // =============================================================================
 
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
-import {
-  Injectable,
-  Logger,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { JwtAdminPayload } from '@/types/jwt/jwt-admin-payload.interface';
+import { PrismaService } from '../../prisma/prisma.service'; // Importamos o PrismaService
+import { AdminUser } from '@/public-client'; // Importamos o tipo do cliente público
+import { JwtAdminPayload } from '@/types/jwt/jwt-admin-payload.interface'; // Importamos nossa interface
 
 @Injectable()
 export class JwtAdminStrategy extends PassportStrategy(Strategy, 'jwt-admin') {
   private readonly logger = new Logger(JwtAdminStrategy.name);
 
-  // ✅ REFINAMENTO: Usando 'private readonly', o padrão do NestJS para injeção.
-  constructor(private readonly configService: ConfigService) {
+  constructor(
+    configService: ConfigService,
+    // ✅ Injetamos o PrismaService para buscar o usuário no banco
+    private prisma: PrismaService,
+  ) {
     super({
+      // ✅ CORREÇÃO: Adicionamos a forma de extrair o token, o que resolve 2 erros.
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      // ✅ REFINAMENTO: A validação agora é feita de forma centralizada no ConfigModule,
-      // o que torna o construtor mais limpo e a configuração mais robusta.
-      secretOrKey: configService.get<string>('JWT_SECRET'),
+      secretOrKey: configService.get<string>('JWT_SECRET')!,
     });
   }
 
   /**
-   * Valida o payload do JWT e o retorna como `req.user`.
+   * Valida o payload do JWT e busca o usuário no banco para garantir que ele
+   * ainda existe e está ativo. Esta é a abordagem stateful, mais segura.
    */
-  async validate(payload: JwtAdminPayload): Promise<JwtAdminPayload> {
-    // Validação de segurança para garantir a integridade do payload.
-    if (!payload?.sub || !payload?.email || !payload?.role) {
-      this.logger.warn(`Payload JWT inválido recebido: ${JSON.stringify(payload)}`);
-      throw new UnauthorizedException('Token JWT inválido ou malformado.');
+  async validate(payload: JwtAdminPayload): Promise<Omit<AdminUser, 'password'>> {
+    this.logger.debug(`Validando token JWT para admin: ${payload.email}`);
+    
+    // Buscamos o usuário no banco a cada requisição para máxima segurança.
+    const adminUser = await this.prisma.adminUser.findUnique({
+      where: { id: payload.sub },
+    });
+
+    if (!adminUser || !adminUser.isActive) {
+      this.logger.warn(`AdminUser do token JWT inválido ou inativo: ${payload.email}`);
+      throw new UnauthorizedException('Token inválido ou usuário removido.');
     }
 
-    // Logging condicional para ambientes de não-produção.
-    if (process.env.NODE_ENV !== 'production') {
-      this.logger.debug(`Admin autenticado via JWT: ${payload.email}`);
-    }
-
-    return payload;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...result } = adminUser;
+    return result;
   }
 }

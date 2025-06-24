@@ -1,26 +1,62 @@
 {
   "compilerOptions": {
-    "module": "CommonJS",
+    "module": "commonjs",
+    "target": "ES2021",
     "declaration": true,
     "removeComments": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "target": "ES2022",
     "sourceMap": true,
     "outDir": "./dist",
     "baseUrl": "./",
-    "paths": {
-      "@/jwt/*": ["src/types/jwt/*"],
-      "@/types/*": ["src/types/*"],
-      "@/common/*": ["src/common/*"],
-      "@prisma-public": ["../node_modules/@prisma/client"],
-      "@prisma-tenant": ["../node_modules/@prisma/tenant-client"]
-    },
-    "incremental": true,
+
+    /* Type Checking */
     "strict": true,
-    "skipLibCheck": true
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictBindCallApply": true,
+    "strictPropertyInitialization": false, // ✅ Desativado para facilitar o uso de DTOs
+    "noImplicitThis": true,
+    "useUnknownInCatchVariables": true,
+    "alwaysStrict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "exactOptionalPropertyTypes": false,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": false,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": false,
+
+    /* Module Resolution */
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "isolatedModules": false,
+
+    /* Decorators */
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+
+    /* Path Aliases */
+    "paths": {
+    // ✅ APELIDO PARA O CLIENTE PÚBLICO
+    "@/public-client": ["src/generated/public-client"],
+    "@/public-client/*": ["src/generated/public-client/*"],
+    // ✅ APELIDO PARA O CLIENTE TENANT
+    "@/tenant-client": ["src/generated/tenant-client"],
+    "@/tenant-client/*": ["src/generated/tenant-client/*"],
+    // Outros apelidos
+    "@/types/*": ["src/types/*"],
+    "@/jwt/*": ["src/types/jwt/*"],
+    "@/common/*": ["src/common/*"]
   },
-  "exclude": ["node_modules", "dist", "test", "**/*spec.ts"]
+
+    /* Libs */
+    "lib": ["es2021"],
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
 }

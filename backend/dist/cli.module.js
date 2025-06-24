@@ -8,7 +8,7 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CliModule = void 0;
 const common_1 = require("@nestjs/common");
-const check_tenants_command_1 = require("./cli/check-tenants.command");
+const check_tenants_command_1 = require("./cli/commands/check-tenants.command");
 const prisma_service_1 = require("./prisma/prisma.service");
 const tenant_service_1 = require("./tenant/tenant.service");
 let CliModule = class CliModule {

@@ -3,5 +3,5 @@ export interface JwtTenantUserPayload {
     email: string;
     role: string;
     tenantId: string;
-    schemaUrl: string;
+    schema: string;
 }

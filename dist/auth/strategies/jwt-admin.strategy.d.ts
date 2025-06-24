@@ -14,6 +14,6 @@ export declare class JwtAdminStrategy extends JwtAdminStrategy_base {
     private prisma;
     private readonly logger;
     constructor(configService: ConfigService, prisma: PrismaService);
-    validate(payload: JwtAdminPayload): Promise<Omit<AdminUser, 'password'>>;
+    validate(payload: JwtAdminPayload): Promise<Omit<AdminUserUser, 'password'>>;
 }
 export {};

@@ -13,10 +13,10 @@ const throttler_1 = require("@nestjs/throttler");
 const core_1 = require("@nestjs/core");
 const env_validation_1 = require("./config/env.validation");
 const prisma_module_1 = require("./prisma/prisma.module");
+const common_module_1 = require("./common/common.module");
 const auth_module_1 = require("./auth/auth.module");
 const tenant_module_1 = require("./tenant/tenant.module");
 const auth_tenant_module_1 = require("./auth-tenant/auth-tenant.module");
-const common_module_1 = require("./common/common.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -35,10 +35,10 @@ exports.AppModule = AppModule = __decorate([
                 },
             ]),
             prisma_module_1.PrismaModule,
-            auth_module_1.AuthModule,
-            tenant_module_1.TenantModule,
-            auth_tenant_module_1.AuthTenantModule,
             common_module_1.CommonModule,
+            auth_module_1.AuthModule,
+            auth_tenant_module_1.AuthTenantModule,
+            tenant_module_1.TenantModule,
         ],
         controllers: [],
         providers: [

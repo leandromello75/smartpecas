@@ -24,7 +24,7 @@ export class LocalTenantUserAuthGuard extends AuthGuard('local-tenant-user') {
    * Manipula o resultado da autenticação local.
    * Se falhar, lança exceção customizada com log apropriado.
    */
-  handleRequest(err: any, user: any, info: any, context: ExecutionContext) {
+  override handleRequest(err: any, user: any, info: any, context: ExecutionContext) {
     if (err || !user) {
       const req = context.switchToHttp().getRequest();
       const emailAttempt = req.body?.email || 'N/D';

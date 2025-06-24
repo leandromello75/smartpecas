@@ -19,10 +19,9 @@ const passport_1 = require("@nestjs/passport");
 const auth_tenant_service_1 = require("./auth-tenant.service");
 const swagger_1 = require("@nestjs/swagger");
 let AuthTenantController = AuthTenantController_1 = class AuthTenantController {
-    authTenantService;
-    logger = new common_1.Logger(AuthTenantController_1.name);
     constructor(authTenantService) {
         this.authTenantService = authTenantService;
+        this.logger = new common_1.Logger(AuthTenantController_1.name);
     }
     async login(req) {
         const user = req.user;

@@ -14,7 +14,7 @@
 // =============================================================================
 
 import { Injectable, Logger, InternalServerErrorException } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '@/tenant-client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TenantContextService, TenantContext } from '../tenant-context/tenant-context.service';
 

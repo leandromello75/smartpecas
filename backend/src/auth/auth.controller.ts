@@ -1,55 +1,71 @@
 // =============================================================================
-// SmartPeças ERP - AuthController (AdminUser)
+// SmartPeças ERP - AuthController (AdminUser) - VERSÃO CORRIGIDA
 // =============================================================================
 // Arquivo: backend/src/auth/auth.controller.ts
 //
-// Descrição: Controlador responsável pela autenticação de administradores
-// globais. Usa guarda local personalizado para validar credenciais e emitir JWT.
+// Descrição: Controlador para autenticação de administradores globais.
 //
-// Versão: 1.0
-//
-// Equipe SmartPeças
-// Criado em: 15/06/2025
+// Versão: 1.1
 // =============================================================================
 
-import { Controller, Post, Body, HttpCode, HttpStatus, Request, UseGuards, Res, Logger } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  HttpCode,
+  HttpStatus,
+  UseGuards,
+  Res,
+  Logger,
+  UnauthorizedException,
+  // ✅ CORREÇÃO: Renomeamos o decorador para evitar conflito
+  Request as NestRequest, 
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
-import { LoginAdminDto } from './dto/login-admin.dto'; // Iremos criar este DTO
-import { Response } from 'express'; // Para usar o tipo Response do Express
-import { LocalAuthGuard } from './guards/local-auth.guard'; // Iremos criar este guarda
+import { LoginAdminDto } from './dto/login-admin.dto';
+// ✅ CORREÇÃO: Importamos os tipos necessários
+import { Request, Response } from 'express';
+import { AuthGuard } from '@nestjs/passport';
+import { AdminUser } from '@/public-client';
 
 @ApiTags('Auth - Admin Global')
-@Controller('auth') // As rotas serão prefixadas com /auth
+@Controller('auth')
 export class AuthController {
   private readonly logger = new Logger(AuthController.name);
 
   constructor(private authService: AuthService) {}
 
+  // ✅ CORREÇÃO: Usamos o guard 'local-admin' que corresponde à sua LocalAdminStrategy
+  @UseGuards(AuthGuard('local-admin'))
   @Post('login/admin')
-  @HttpCode(HttpStatus.OK) // O login bem-sucedido retorna 200 OK
-  @UseGuards(LocalAuthGuard) // Usa o guarda local para autenticar email/senha
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Login de administrador global do sistema' })
-  @ApiResponse({
-    status: 200,
-    description: 'Login bem-sucedido. Retorna token JWT.',
-    schema: {
-      type: 'object',
-      properties: {
-        access_token: { type: 'string', example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...' },
-      },
-    },
-  })
+  @ApiBody({ type: LoginAdminDto }) // O Body da requisição espera este DTO
+  @ApiResponse({ status: 200, description: 'Login bem-sucedido. Retorna token JWT.'})
   @ApiResponse({ status: 401, description: 'Credenciais inválidas.' })
-  @ApiBody({ type: LoginAdminDto, description: 'Credenciais de login do administrador' })
-  async loginAdmin(@Request() req, @Res({ passthrough: true }) res: Response) {
-    this.logger.log(`Tentativa de login de administrador para: ${req.user.email}`);
-    // req.user é populado pelo LocalAuthGuard com o AdminUser validado
-    const result = await this.authService.loginAdmin(req.user);
+  async loginAdmin(
+    // ✅ CORREÇÃO: Usamos o decorador renomeado 'NestRequest' e o tipo 'Request' do Express
+    @NestRequest() req: Request, 
+    @Res({ passthrough: true }) res: Response
+  ) {
+    // ✅ CORREÇÃO: Fazemos a asserção de tipo e a verificação de segurança
+    const user = req.user as Omit<AdminUser, 'password'>;
+    if (!user) {
+      throw new UnauthorizedException('Falha no processo de autenticação do guard.');
+    }
 
-    // Opcional: Definir o token como um cookie HTTP-only (mais seguro para navegadores)
-    // res.cookie('jwt', result.access_token, { httpOnly: true, secure: process.env.NODE_ENV === 'production' });
+    this.logger.log(`Login bem-sucedido para administrador: ${user.email}`);
 
-    return result; // Retorna o token no corpo da resposta
+    // A lógica de chamada ao serviço e retorno do token está perfeita.
+    const result = await this.authService.loginAdmin(user);
+
+    // Opcional: Definir o token como um cookie
+    res.cookie('jwt_admin', result.access_token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+    });
+
+    return result;
   }
 }

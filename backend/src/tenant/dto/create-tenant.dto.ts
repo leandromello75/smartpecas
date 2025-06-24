@@ -26,30 +26,30 @@ export class CreateTenantDto {
   @IsNotEmpty()
   @IsString()
   @Length(3, 100)
-  name: string;
+  name!: string;
 
   @IsNotEmpty()
   @IsString()
   @Matches(/^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/, {
     message: 'CNPJ deve estar no formato 00.000.000/0000-00',
   })
-  cnpj: string;
+  cnpj!: string;
 
   @IsNotEmpty()
   @IsEmail()
-  email: string;
+  email!: string;
 
   @IsNotEmpty()
   @IsString()
   @Length(3, 100)
-  adminName: string;
+  adminName!: string;
 
   @IsNotEmpty()
   @IsString()
   @MinLength(6, {
     message: 'A senha deve ter pelo menos 6 caracteres',
   })
-  password: string;
+  password!: string;
 
   @IsOptional()
   @IsString()

@@ -2,17 +2,16 @@ export interface TenantContext {
     id: string;
     schemaUrl: string;
     name: string;
-    cnpj: string;
-    email: string;
+    cnpj: string | null;
+    isActive: boolean;
     billingStatus: 'ACTIVE' | 'PAST_DUE' | 'SUSPENDED';
 }
 export declare class TenantContextService {
     private readonly logger;
     private readonly asyncLocalStorage;
-    setTenant(tenantContext: TenantContext): void;
+    run<R>(context: TenantContext, fn: () => R): R;
     getTenantContext(): TenantContext;
-    get tenantId(): string | undefined;
-    get tenantSchemaUrl(): string | undefined;
-    get billingStatus(): 'ACTIVE' | 'PAST_DUE' | 'SUSPENDED' | undefined;
-    disable(): void;
+    get tenantId(): string;
+    get tenantSchemaUrl(): string;
+    get billingStatus(): 'ACTIVE' | 'PAST_DUE' | 'SUSPENDED';
 }

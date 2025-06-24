@@ -18,7 +18,7 @@ export interface JwtTenantUserPayload {
   email: string;
   role: string;     // Ex: 'SELLER', 'MANAGER', 'ADMIN' (do tenant)
   tenantId: string; // ID do inquilino (empresa)
-  schemaUrl: string; // Nome do schema PostgreSQL para este inquilino
+  schema: string; // Nome do schema PostgreSQL para este inquilino
   // Opcional: Adicione quaisquer outras informações que precise no token
   // Ex: 'name', 'companyId', 'permissions', etc.
 }

@@ -1,5 +1,5 @@
 import { JwtService } from '@nestjs/jwt';
-import { User } from '@prisma/client';
+import { User } from '@/tenant-client';
 import { TenantContextService } from '../common/tenant-context/tenant-context.service';
 import { PrismaService } from '../prisma/prisma.service';
 export declare class AuthTenantService {

@@ -10,11 +10,19 @@
 // =============================================================================
 
 import { Global, Module } from '@nestjs/common';
+import { APP_INTERCEPTOR } from '@nestjs/core';
 import { TenantContextService } from './tenant-context/tenant-context.service';
+import { TenantInterceptor } from './interceptors/tenant.interceptor';
 
 @Global()
 @Module({
-  providers: [TenantContextService],
+  providers: [
+    TenantContextService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: TenantInterceptor,
+    },
+  ],
   exports: [TenantContextService],
 })
 export class CommonModule {}

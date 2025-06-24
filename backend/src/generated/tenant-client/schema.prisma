@@ -1,0 +1,357 @@
+// =============================================================================
+// SmartPeças ERP - Schema Prisma (Modelos de Tenant) - VERSÃO FINAL OTIMIZADA
+// =============================================================================
+// Arquivo: prisma/tenant.prisma
+//
+// Descrição: Schema multi-tenant do SmartPeças ERP com estrutura robusta para
+// o setor de autopeças, incluindo auditoria, controle de acesso, performance
+// otimizada e modelos auxiliares para veículos e histórico do cliente.
+// =============================================================================
+// Versão: 2.2
+// Equipe SmartPeças
+// Atualizado em: 22/06/2025
+// =============================================================================
+
+generator tenant_client {
+  provider = "prisma-client-js"
+  output   = "../backend/src/generated/tenant-client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =============================================================================
+// ENUMS
+// =============================================================================
+
+enum Role {
+  USER
+  ADMIN
+  GUEST
+
+  @@map("user_role")
+}
+
+enum TipoCliente {
+  PESSOA_FISICA
+  PESSOA_JURIDICA
+
+  @@map("tipo_cliente")
+}
+
+enum TipoEndereco {
+  COMERCIAL
+  RESIDENCIAL
+  ENTREGA
+  COBRANCA
+
+  @@map("tipo_endereco")
+}
+
+enum TipoNegocio {
+  OFICINA
+  LOJA
+  DISTRIBUIDOR
+}
+
+enum FrequenciaCompra {
+  ALTA
+  MEDIA
+  BAIXA
+}
+
+enum FormaPagamentoPadrao {
+  VISTA
+  PRAZO
+  CARTAO
+}
+
+enum NivelConfidencialidade {
+  PUBLICO
+  INTERNO
+  CONFIDENCIAL
+}
+
+// =============================================================================
+// MODELO: Tenant (Stub)
+// =============================================================================
+
+model Tenant {
+  id       String    @id
+  users    User[]
+  products Product[]
+  clientes Cliente[]
+  orders   Order[]
+}
+
+// =============================================================================
+// MODELO: User
+// =============================================================================
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String?
+  role      Role     @default(USER)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  orders Order[]
+
+  @@index([tenantId])
+  @@map("users")
+}
+
+// =============================================================================
+// MODELO: Product
+// =============================================================================
+
+model Product {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  price       Decimal  @db.Decimal(10, 2)
+  sku         String?  @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  orderItems OrderItem[]
+
+  @@index([tenantId])
+  @@map("products")
+}
+
+// =============================================================================
+// MODELO: Cliente
+// =============================================================================
+
+model Cliente {
+  id                  String      @id @default(uuid())
+  tipoCliente         TipoCliente
+  nome                String
+  nomeFantasia        String?
+  documento           String      @unique
+  documentoTipo       String
+  documentoValido     Boolean     @default(false)
+  documentoValidadoEm DateTime?
+  inscricaoEstadual   String?
+  inscricaoMunicipal  String?
+
+  email    String?
+  telefone String?
+  celular  String?
+  website  String?
+
+  cep         String?
+  logradouro  String?
+  numero      String?
+  complemento String?
+  bairro      String?
+  cidade      String?
+  estado      String?
+  pais        String? @default("Brasil")
+
+  isInadimplente       Boolean  @default(false)
+  limiteCredito        Decimal? @db.Decimal(15, 2)
+  limiteCreditoUsado   Decimal? @db.Decimal(15, 2)
+  diasPagamento        Int?     @default(30)
+  formaPagamentoPadrao String?
+  descontoMaximo       Decimal? @db.Decimal(5, 2)
+  comissaoVendedor     Decimal? @db.Decimal(5, 2)
+  observacoes          String?
+
+  tipoNegocio     String?
+  especialidades  String[]
+  marcasAtendidas String[]
+  certificacoes   String[]
+  temOficina      Boolean  @default(false)
+  temBalcao       Boolean  @default(true)
+
+  totalPedidos      Int       @default(0)
+  valorTotalCompras Decimal?  @db.Decimal(15, 2)
+  ultimaCompra      DateTime?
+  frequenciaCompra  String?
+  scoreCliente      Int?
+
+  acessoRestrito         Boolean  @default(false)
+  gruposAcesso           String[]
+  nivelConfidencialidade String?  @default("INTERNO")
+
+  isAtivo           Boolean   @default(true)
+  deletedAt         DateTime?
+  deletedBy         String?
+  deleteReason      String?
+  criadoEm          DateTime  @default(now())
+  atualizadoEm      DateTime  @updatedAt
+  criadoPor         String?
+  criadoPorNome     String?
+  criadoPorIp       String?
+  atualizadoPor     String?
+  atualizadoPorNome String?
+  atualizadoPorIp   String?
+  versao            Int       @default(1)
+
+  anoMes    String
+  trimestre String
+
+  dadosCnpjApi       Json?
+  dadosCepApi        Json?
+  ultimaConsultaCnpj DateTime?
+  ultimaConsultaCep  DateTime?
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
+
+  enderecos EnderecoCliente[]
+  contatos  ContatoCliente[]
+  veiculos  VeiculoCliente[]
+  historico HistoricoCliente[]
+  orders    Order[]
+
+  @@index([tenantId, isAtivo])
+  @@index([tenantId, tipoCliente, isAtivo])
+  @@index([tenantId, isInadimplente, isAtivo])
+  @@index([tenantId, documento])
+  @@index([tenantId, email])
+  @@index([tenantId, nome])
+  @@index([tenantId, criadoEm])
+  @@index([tenantId, atualizadoEm])
+  @@index([tenantId, ultimaCompra])
+  @@index([tenantId, scoreCliente])
+  @@index([anoMes])
+  @@index([trimestre])
+  @@index([documentoTipo, documentoValido])
+  @@map("clientes")
+}
+
+model EnderecoCliente {
+  id           String       @id @default(uuid())
+  clienteId    String
+  cliente      Cliente      @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  tipo         TipoEndereco
+  descricao    String?
+  cep          String
+  logradouro   String
+  numero       String
+  complemento  String?
+  bairro       String
+  cidade       String
+  estado       String
+  pais         String       @default("Brasil")
+  isPrincipal  Boolean      @default(false)
+  isAtivo      Boolean      @default(true)
+  criadoEm     DateTime     @default(now())
+  atualizadoEm DateTime     @updatedAt
+
+  @@index([clienteId])
+  @@index([tipo])
+  @@index([isPrincipal])
+  @@map("enderecos_clientes")
+}
+
+model ContatoCliente {
+  id           String   @id @default(uuid())
+  clienteId    String
+  cliente      Cliente  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  nome         String
+  cargo        String?
+  email        String?
+  telefone     String?
+  celular      String?
+  observacoes  String?
+  isPrincipal  Boolean  @default(false)
+  isAtivo      Boolean  @default(true)
+  criadoEm     DateTime @default(now())
+  atualizadoEm DateTime @updatedAt
+
+  @@index([clienteId])
+  @@index([email])
+  @@index([isPrincipal])
+  @@map("contatos_clientes")
+}
+
+model VeiculoCliente {
+  id              String   @id @default(uuid())
+  clienteId       String
+  cliente         Cliente  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  veiculoGlobalId String
+  placa           String?
+  cor             String?
+  anoFabricacao   Int?
+  anoModelo       Int?
+  quilometragem   Int?
+  observacoes     String?
+  isPrincipal     Boolean  @default(false)
+  isAtivo         Boolean  @default(true)
+  criadoEm        DateTime @default(now())
+  atualizadoEm    DateTime @updatedAt
+
+  @@index([clienteId])
+  @@index([veiculoGlobalId])
+  @@index([placa])
+  @@map("veiculos_clientes")
+}
+
+model HistoricoCliente {
+  id          String   @id @default(uuid())
+  clienteId   String
+  cliente     Cliente  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  tipo        String // COMPRA, PAGAMENTO, ALTERACAO...
+  descricao   String
+  valor       Decimal? @db.Decimal(15, 2)
+  observacoes String?
+  criadoEm    DateTime @default(now())
+  criadoPor   String?
+
+  @@index([clienteId, tipo])
+  @@index([clienteId, criadoEm])
+  @@map("historico_clientes")
+}
+
+model Order {
+  id          String   @id @default(uuid())
+  orderDate   DateTime @default(now())
+  totalAmount Decimal  @db.Decimal(10, 2)
+  status      String   @default("pending")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  customerId String
+  customer   Cliente @relation(fields: [customerId], references: [id])
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  items OrderItem[]
+
+  @@index([tenantId])
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  quantity  Int
+  unitPrice Decimal @db.Decimal(10, 2)
+
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@unique([orderId, productId])
+  @@map("order_items")
+}

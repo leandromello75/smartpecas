@@ -47,14 +47,12 @@ exports.AuthService = void 0;
 const common_1 = require("@nestjs/common");
 const jwt_1 = require("@nestjs/jwt");
 const prisma_service_1 = require("../prisma/prisma.service");
-const bcrypt = __importStar(require("bcryptjs"));
+const bcrypt = __importStar(require("bcrypt"));
 let AuthService = AuthService_1 = class AuthService {
-    prisma;
-    jwtService;
-    logger = new common_1.Logger(AuthService_1.name);
     constructor(prisma, jwtService) {
         this.prisma = prisma;
         this.jwtService = jwtService;
+        this.logger = new common_1.Logger(AuthService_1.name);
     }
     async validateAdminUser(email, password_plain) {
         this.logger.debug(`Validando adminUser: ${email}`);
@@ -63,16 +61,16 @@ let AuthService = AuthService_1 = class AuthService {
             include: { tenant: true },
         });
         if (!adminUser || !adminUser.isActive) {
-            this.logger.warn(`Login falhou para '${email}': usuário não encontrado ou inativo.`);
+            this.logger.warn(`Login de admin falhou para '${email}': usuário não encontrado ou inativo.`);
             throw new common_1.UnauthorizedException('Credenciais inválidas.');
         }
         if (!adminUser.tenant || adminUser.tenant.billingStatus !== 'ACTIVE') {
-            this.logger.warn(`Login bloqueado para '${email}': tenant suspenso ou inadimplente.`);
-            throw new common_1.ForbiddenException('O acesso está suspenso devido à situação de pagamento do cliente.');
+            this.logger.warn(`Login de admin bloqueado para '${email}': tenant inadimplente.`);
+            throw new common_1.ForbiddenException('O acesso à conta está suspenso.');
         }
         const isPasswordValid = await bcrypt.compare(password_plain, adminUser.password);
         if (!isPasswordValid) {
-            this.logger.warn(`Login falhou para '${email}': senha inválida.`);
+            this.logger.warn(`Login de admin falhou para '${email}': senha inválida.`);
             throw new common_1.UnauthorizedException('Credenciais inválidas.');
         }
         const { password, ...safeUser } = adminUser;
@@ -84,7 +82,7 @@ let AuthService = AuthService_1 = class AuthService {
             sub: adminUser.id,
             email: adminUser.email,
             role: adminUser.role,
-            tenantId: adminUser.tenantId || undefined,
+            tenantId: adminUser.tenantId,
         };
         const token = this.jwtService.sign(payload);
         return { access_token: token };

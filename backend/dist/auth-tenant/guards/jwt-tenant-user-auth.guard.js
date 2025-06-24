@@ -11,11 +11,14 @@ exports.JwtTenantUserAuthGuard = void 0;
 const common_1 = require("@nestjs/common");
 const passport_1 = require("@nestjs/passport");
 let JwtTenantUserAuthGuard = JwtTenantUserAuthGuard_1 = class JwtTenantUserAuthGuard extends (0, passport_1.AuthGuard)('jwt-tenant-user') {
-    logger = new common_1.Logger(JwtTenantUserAuthGuard_1.name);
-    handleRequest(err, user, info, context) {
+    constructor() {
+        super(...arguments);
+        this.logger = new common_1.Logger(JwtTenantUserAuthGuard_1.name);
+    }
+    handleRequest(err, user, _info, _context) {
         if (err || !user) {
-            this.logger.warn(`Falha na autenticação JwtTenantUserAuthGuard. Erro: ${err?.message || 'N/A'}. Info: ${info?.message || 'N/A'}`);
-            throw err || new common_1.UnauthorizedException('Token de autenticação inválido ou expirado.');
+            this.logger.warn(`Falha na autenticação (JwtTenantUserAuthGuard). Erro: ${err?.message || 'Usuário não retornado pela estratégia.'}`);
+            throw err || new common_1.UnauthorizedException('Token de autenticação inválido, expirado ou usuário não existe mais.');
         }
         return user;
     }

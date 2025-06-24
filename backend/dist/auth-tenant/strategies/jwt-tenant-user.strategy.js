@@ -15,41 +15,33 @@ const passport_jwt_1 = require("passport-jwt");
 const passport_1 = require("@nestjs/passport");
 const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
-const prisma_service_1 = require("../../prisma/prisma.service");
 let JwtTenantUserStrategy = JwtTenantUserStrategy_1 = class JwtTenantUserStrategy extends (0, passport_1.PassportStrategy)(passport_jwt_1.Strategy, 'jwt-tenant-user') {
-    configService;
-    prismaService;
-    logger = new common_1.Logger(JwtTenantUserStrategy_1.name);
-    constructor(configService, prismaService) {
+    constructor(configService) {
         super({
             jwtFromRequest: passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(),
             ignoreExpiration: false,
             secretOrKey: configService.get('JWT_SECRET'),
         });
-        this.configService = configService;
-        this.prismaService = prismaService;
+        this.logger = new common_1.Logger(JwtTenantUserStrategy_1.name);
     }
     async validate(payload) {
-        this.logger.debug(`Validando JWT para usuário do tenant: ${payload.email}`);
-        const tenantPrisma = await this.prismaService.getTenantClient(payload.schemaUrl);
-        const user = await tenantPrisma.user.findUnique({
-            where: {
-                id: payload.sub,
-                email: payload.email,
-            },
-        });
-        if (!user || !user.isActive) {
-            this.logger.warn(`JWT inválido ou usuário não encontrado para tenant '${payload.tenantId}': ${payload.email}`);
-            throw new common_1.UnauthorizedException('Token JWT inválido ou usuário inativo.');
+        if (!payload?.sub ||
+            !payload?.email ||
+            !payload?.role ||
+            !payload?.tenantId ||
+            !payload?.schema) {
+            this.logger.warn(`Payload JWT de tenant inválido recebido: ${JSON.stringify(payload)}`);
+            throw new common_1.UnauthorizedException('Token JWT inválido ou malformado.');
         }
-        const { password, ...userWithoutPassword } = user;
-        return userWithoutPassword;
+        if (process.env.NODE_ENV !== 'production') {
+            this.logger.debug(`Usuário de Tenant autenticado via JWT: ${payload.email} para o tenant ${payload.tenantId}`);
+        }
+        return payload;
     }
 };
 exports.JwtTenantUserStrategy = JwtTenantUserStrategy;
 exports.JwtTenantUserStrategy = JwtTenantUserStrategy = JwtTenantUserStrategy_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [config_1.ConfigService,
-        prisma_service_1.PrismaService])
+    __metadata("design:paramtypes", [config_1.ConfigService])
 ], JwtTenantUserStrategy);
 //# sourceMappingURL=jwt-tenant-user.strategy.js.map

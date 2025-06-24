@@ -14,9 +14,6 @@ const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../../prisma/prisma.service");
 const tenant_context_service_1 = require("../tenant-context/tenant-context.service");
 let BaseTenantService = class BaseTenantService {
-    prisma;
-    tenantContextService;
-    logger;
     constructor(prisma, tenantContextService) {
         this.prisma = prisma;
         this.tenantContextService = tenantContextService;

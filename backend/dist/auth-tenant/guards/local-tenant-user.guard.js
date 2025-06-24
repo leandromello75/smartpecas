@@ -11,7 +11,10 @@ exports.LocalTenantUserAuthGuard = void 0;
 const common_1 = require("@nestjs/common");
 const passport_1 = require("@nestjs/passport");
 let LocalTenantUserAuthGuard = LocalTenantUserAuthGuard_1 = class LocalTenantUserAuthGuard extends (0, passport_1.AuthGuard)('local-tenant-user') {
-    logger = new common_1.Logger(LocalTenantUserAuthGuard_1.name);
+    constructor() {
+        super(...arguments);
+        this.logger = new common_1.Logger(LocalTenantUserAuthGuard_1.name);
+    }
     handleRequest(err, user, info, context) {
         if (err || !user) {
             const req = context.switchToHttp().getRequest();

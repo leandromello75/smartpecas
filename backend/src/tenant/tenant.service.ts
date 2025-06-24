@@ -1,26 +1,21 @@
 // =============================================================================
-// SmartPeças ERP - Tenant Service
+// SmartPeças ERP - Tenant Service (VERSÃO FINAL REATORADA)
 // =============================================================================
 // Arquivo: backend/src/tenant/tenant.service.ts
-//
-// Descrição: Serviço Tenant
-//
-// Versão: 1.0
-//
-// Equipe SmartPeças
-// Criado em: 15/06/2025
+// Versão: 3.3
 // =============================================================================
+
 import {
   Injectable,
   InternalServerErrorException,
   Logger,
   ConflictException,
-  BadRequestException,
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTenantDto } from './dto/create-tenant.dto';
-import { Tenant } from '@prisma/client';
+// ✅ CORREÇÃO: Importando Tenant, AdminUser e Prisma do cliente público correto.
+import { Tenant } from '@/public-client';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -30,78 +25,63 @@ export class TenantService {
   constructor(private prisma: PrismaService) {}
 
   async create(createTenantDto: CreateTenantDto): Promise<Tenant> {
-  const { cnpj, email, name, adminName, password, ...rest } = createTenantDto;
-  const schemaUrl = `tenant_${this.generateSlug(name || cnpj)}_${this.generateUniqueSuffix()}`;
+    const { cnpj, email, name, adminName, password } = createTenantDto;
 
-  const existingTenant = await this.prisma.tenant.findFirst({
-    where: {
-      OR: [{ cnpj }, { name }],
-    },
-  });
-
-  if (existingTenant) {
-    if (existingTenant.cnpj === cnpj) {
-      throw new ConflictException(`Um inquilino com o CNPJ '${cnpj}' já existe.`);
+    // A lógica de verificação de conflitos está ótima.
+    const existingTenant = await this.prisma.tenant.findFirst({
+      where: { OR: [{ cnpj: cnpj }, { name }] },
+    });
+    if (existingTenant) {
+      const field = existingTenant.cnpj === cnpj ? 'CNPJ' : 'nome';
+      throw new ConflictException(`Um inquilino com este ${field} já existe.`);
     }
-    if (existingTenant.name === name) {
-      throw new ConflictException(`Um inquilino com o nome '${name}' já existe.`);
+
+    const existingAdmin = await this.prisma.adminUser.findUnique({
+      where: { email },
+    });
+    if (existingAdmin) {
+      throw new ConflictException(
+        `Um usuário administrador com o e-mail '${email}' já existe.`,
+      );
     }
-  }
 
-  // ✅ Verifica se o e-mail já está em uso por outro admin global
-  const existingAdminUser = await this.prisma.adminUser.findUnique({
-    where: { email },
-  });
+    const schemaUrl = `tenant_${this.generateSlug(name)}_${this.generateUniqueSuffix()}`;
 
-  if (existingAdminUser) {
-    throw new ConflictException(`Um usuário administrador global com o e-mail '${email}' já existe.`);
-  }
+    try {
+      const hashedPassword = await bcrypt.hash(password, 10);
 
-  try {
-    const tenant = await this.prisma.$transaction(async (prismaTx) => {
-      const createdTenant = await prismaTx.tenant.create({
+      // ✅ SEGURANÇA E EFICIÊNCIA: Usando transação e 'nested write'
+      // para criar o Tenant e o AdminUser em uma única operação atômica.
+      const newTenant = await this.prisma.tenant.create({
         data: {
           name,
           cnpj,
-          email,
           schemaUrl,
-          isActive: true,
-          ...rest,
+          adminUsers: {
+            create: {
+              email,
+              password: hashedPassword,
+              name: adminName,
+            },
+          },
         },
       });
 
-      this.logger.log(`Tenant '${name}' criado no schema público.`);
+      this.logger.log(`Tenant '${newTenant.name}' e Admin User criados no banco.`);
 
+      // ✅ ARQUITETURA: Após o sucesso, chamamos a função para criar o schema físico.
+      // Isso assume que seu PrismaService tem o método que implementamos antes.
       await this.prisma.createTenantSchema(schemaUrl);
 
-      const hashedPassword = await bcrypt.hash(password, 10);
-
-      await prismaTx.adminUser.create({
-        data: {
-          name: adminName,
-          email,
-          password: hashedPassword,
-          tenantId: createdTenant.id,
-          role: 'tenant_admin',
-        },
-      });
-
-      this.logger.log(`AdminUser criado para tenant '${schemaUrl}'`);
-
-      return createdTenant;
-    });
-
-    return tenant;
-  } catch (error) {
-    this.logger.error(`Erro ao criar tenant '${name}':`, error.stack);
-    throw new InternalServerErrorException(
-      `Erro ao criar o tenant '${name}': ${error.message}`,
-    );
+      return newTenant;
+    } catch (error: any) {
+      this.logger.error(`Erro ao criar tenant '${name}':`, error.stack);
+      throw new InternalServerErrorException('Não foi possível criar o tenant.');
+    }
   }
-}
 
-  async findOne(id: string): Promise<Tenant | null> {
-    const tenant = await this.prisma.getTenantById(id);
+  async findOne(id: string): Promise<Tenant> {
+    const tenant = await this.prisma.tenant.findUnique({ where: { id } });
     if (!tenant) {
       throw new NotFoundException(`Inquilino com ID '${id}' não encontrado.`);
     }
@@ -109,22 +89,17 @@ export class TenantService {
   }
 
   async findAll(): Promise<Tenant[]> {
-    return this.prisma.getActiveTenants();
+    return this.prisma.tenant.findMany({
+      where: { isActive: true },
+      orderBy: { name: 'asc' },
+    });
   }
 
   private generateSlug(text: string): string {
-    return text
-      .toString()
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .toLowerCase()
-      .trim()
-      .replace(/\s+/g, '_')
-      .replace(/[^\w-]+/g, '')
-      .replace(/--+/g, '_');
+    return text.toString().toLowerCase().trim().replace(/\s+/g, '_').replace(/[^\w-]+/g, '');
   }
 
   private generateUniqueSuffix(): string {
-    return `${Date.now()}_${Math.floor(1000 + Math.random() * 9000)}`;
+    return `${Date.now()}`.slice(-6);
   }
 }

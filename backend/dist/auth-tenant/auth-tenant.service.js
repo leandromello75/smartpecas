@@ -46,30 +46,30 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.AuthTenantService = void 0;
 const common_1 = require("@nestjs/common");
 const jwt_1 = require("@nestjs/jwt");
-const bcrypt = __importStar(require("bcryptjs"));
+const bcrypt = __importStar(require("bcrypt"));
 const tenant_context_service_1 = require("../common/tenant-context/tenant-context.service");
 const prisma_service_1 = require("../prisma/prisma.service");
 let AuthTenantService = AuthTenantService_1 = class AuthTenantService {
-    jwtService;
-    prisma;
-    tenantContext;
-    logger = new common_1.Logger(AuthTenantService_1.name);
     constructor(jwtService, prisma, tenantContext) {
         this.jwtService = jwtService;
         this.prisma = prisma;
         this.tenantContext = tenantContext;
+        this.logger = new common_1.Logger(AuthTenantService_1.name);
     }
     async validateTenantUser(email, plainPassword) {
-        const schemaUrl = this.tenantContext.tenantSchemaUrl;
-        const tenantPrisma = await this.prisma.getTenantClient(schemaUrl);
+        const tenantSchema = this.tenantContext.tenantSchemaUrl;
+        if (!tenantSchema) {
+            throw new common_1.InternalServerErrorException('Schema do tenant não encontrado no contexto da requisição.');
+        }
+        const tenantPrisma = await this.prisma.getTenantClient(tenantSchema);
         const user = await tenantPrisma.user.findUnique({ where: { email } });
         if (!user || !user.isActive) {
-            this.logger.warn(`Tentativa de login falhou. Usuário não encontrado ou inativo: ${email}`);
+            this.logger.warn(`Tentativa de login falhou para ${email} no schema ${tenantSchema}: Usuário não encontrado ou inativo.`);
             throw new common_1.UnauthorizedException('Credenciais inválidas.');
         }
         const passwordOk = await bcrypt.compare(plainPassword, user.password);
         if (!passwordOk) {
-            this.logger.warn(`Tentativa de login falhou. Senha inválida para: ${email}`);
+            this.logger.warn(`Tentativa de login falhou para ${email} no schema ${tenantSchema}: Senha inválida.`);
             throw new common_1.UnauthorizedException('Credenciais inválidas.');
         }
         const { password, ...userSafe } = user;
@@ -80,7 +80,7 @@ let AuthTenantService = AuthTenantService_1 = class AuthTenantService {
             sub: user.id,
             email: user.email,
             role: user.role,
-            tenantId: this.tenantContext.tenantId,
+            tenantId: user.tenantId,
         };
         const token = this.jwtService.sign(payload);
         return { access_token: token };

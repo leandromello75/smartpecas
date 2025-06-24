@@ -16,12 +16,10 @@ const prisma_service_1 = require("../../prisma/prisma.service");
 const tenant_context_service_1 = require("../tenant-context/tenant-context.service");
 require("../../interfaces/request-with-tenant.interface");
 let TenantResolverGuard = TenantResolverGuard_1 = class TenantResolverGuard {
-    prisma;
-    tenantContext;
-    logger = new common_1.Logger(TenantResolverGuard_1.name);
     constructor(prisma, tenantContext) {
         this.prisma = prisma;
         this.tenantContext = tenantContext;
+        this.logger = new common_1.Logger(TenantResolverGuard_1.name);
     }
     async canActivate(context) {
         const request = context.switchToHttp().getRequest();

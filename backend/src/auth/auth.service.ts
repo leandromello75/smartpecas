@@ -1,15 +1,9 @@
 // =============================================================================
-// SmartPeças ERP - AuthService (AdminUser)
+// SmartPeças ERP - AuthService (AdminUser) - VERSÃO FINAL
 // =============================================================================
 // Arquivo: backend/src/auth/auth.service.ts
 //
-// Descrição: Serviço de autenticação de administradores globais. Valida
-// credenciais, verifica status do tenant associado e emite JWT.
-//
-// Versão: 1.1
-//
-// Equipe SmartPeças
-// Criado em: 15/06/2025
+// Versão: 3.0
 // =============================================================================
 
 import {
@@ -20,9 +14,11 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
-import * as bcrypt from 'bcryptjs';
-import { AdminUser } from '@prisma/client';
-import { JwtAdminPayload } from './strategies/jwt-admin.strategy';
+import * as bcrypt from 'bcrypt';
+// AdminUser vem do cliente público padrão
+import { AdminUser } from '@/public-client'; 
+// JwtAdminPayload vem do nosso tipo compartilhado
+import { JwtAdminPayload } from '@/types/jwt/jwt-admin-payload.interface';
 
 @Injectable()
 export class AuthService {
@@ -34,11 +30,7 @@ export class AuthService {
   ) {}
 
   /**
-   * Valida as credenciais de um AdminUser (email e senha), incluindo
-   * verificação do status do tenant associado.
-   * @param email E-mail do administrador
-   * @param password_plain Senha em texto puro
-   * @returns Objeto AdminUser validado (sem a senha)
+   * Valida as credenciais de um AdminUser.
    */
   async validateAdminUser(
     email: string,
@@ -52,21 +44,19 @@ export class AuthService {
     });
 
     if (!adminUser || !adminUser.isActive) {
-      this.logger.warn(`Login falhou para '${email}': usuário não encontrado ou inativo.`);
+      this.logger.warn(`Login de admin falhou para '${email}': usuário não encontrado ou inativo.`);
       throw new UnauthorizedException('Credenciais inválidas.');
     }
 
     if (!adminUser.tenant || adminUser.tenant.billingStatus !== 'ACTIVE') {
-      this.logger.warn(`Login bloqueado para '${email}': tenant suspenso ou inadimplente.`);
-      throw new ForbiddenException(
-        'O acesso está suspenso devido à situação de pagamento do cliente.',
-      );
+      this.logger.warn(`Login de admin bloqueado para '${email}': tenant inadimplente.`);
+      throw new ForbiddenException('O acesso à conta está suspenso.');
     }
 
     const isPasswordValid = await bcrypt.compare(password_plain, adminUser.password);
 
     if (!isPasswordValid) {
-      this.logger.warn(`Login falhou para '${email}': senha inválida.`);
+      this.logger.warn(`Login de admin falhou para '${email}': senha inválida.`);
       throw new UnauthorizedException('Credenciais inválidas.');
     }
 
@@ -76,8 +66,6 @@ export class AuthService {
 
   /**
    * Gera um token JWT para o AdminUser validado.
-   * @param adminUser Usuário autenticado (sem senha)
-   * @returns Objeto com token JWT
    */
   async loginAdmin(
     adminUser: Omit<AdminUser, 'password'>,
@@ -88,11 +76,10 @@ export class AuthService {
       sub: adminUser.id,
       email: adminUser.email,
       role: adminUser.role,
-      tenantId: adminUser.tenantId || undefined,
+      tenantId: adminUser.tenantId,
     };
 
     const token = this.jwtService.sign(payload);
-
     return { access_token: token };
   }
 }

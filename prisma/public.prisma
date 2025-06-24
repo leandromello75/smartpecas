@@ -8,9 +8,9 @@
 // =============================================================================
 
 generator client {
-  // Este é o gerador para o cliente padrão do schema público.
-  // A saída será em 'node_modules/@prisma/client' por padrão.
   provider = "prisma-client-js"
+  // ✅ NOVO CAMINHO EXPLÍCITO: O cliente público agora será gerado aqui.
+  output   = "../backend/src/generated/public-client"
 }
 
 datasource db {
@@ -18,23 +18,23 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// =============================================================================
-// === Modelos GLOBAIS (schema "public") ===
-// =============================================================================
-
+// === Modelos Reais deste Schema ===
 model Tenant {
-  id            String   @id @default(uuid())
+  id            String    @id @default(uuid())
   name          String
-  // ✅ O campo 'schema' é CRÍTICO. É ele que a aplicação usará para
-  // saber a qual banco de dados do tenant se conectar.
-  schema        String   @unique
-  cnpj          String?  @unique
-  isActive      Boolean  @default(true)
-  billingStatus String   @default("ACTIVE")
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  schemaUrl     String    @unique @map("schema_url")
+  cnpj          String?   @unique
+  isActive      Boolean   @default(true)
+  billingStatus String    @default("ACTIVE")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 
-  adminUsers AdminUser[]
+  adminUsers    AdminUser[]
+
+  users       User[]
+  products    Product[]
+  customers   Customer[]
+  orders      Order[]
 
   @@map("tenants")
 }
@@ -49,8 +49,51 @@ model AdminUser {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  tenantId  String
-  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id])
 
   @@map("admin_users")
+}
+
+
+// === Contratos / Stubs de Modelos Externos ===
+// Adicionamos definições mínimas para que as relações acima funcionem.
+model User {
+  id String @id
+  tenantId String
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  orders Order[]
+}
+
+model Product {
+  id String @id
+  tenantId String
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  orderItems OrderItem[]
+}
+
+model Customer {
+  id String @id
+  tenantId String
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  orders Order[]
+}
+
+model Order {
+  id String @id
+  tenantId String
+  tenant Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id])
+  userId String
+  customer Customer @relation(fields: [customerId], references: [id])
+  customerId String
+  items OrderItem[]
+}
+
+model OrderItem {
+  id String @id
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId String
+  product Product @relation(fields: [productId], references: [id])
+  productId String
 }

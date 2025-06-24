@@ -5,6 +5,6 @@ export declare class LocalAdminStrategy extends LocalAdminStrategy_base {
     private authService;
     private readonly logger;
     constructor(authService: AuthService);
-    validate(email: string, password: string): Promise<Omit<AdminUser, 'password'>>;
+    validate(email: string, password: string): Promise<Omit<AdminUserUser, 'password'>>;
 }
 export {};

@@ -38,10 +38,10 @@ export class CheckTenantsCommand extends CommandRunner {
     for (const tenant of tenants) {
       try {
         const client = await this.prisma.getTenantClient(tenant.schemaUrl);
-        const res = await client.$queryRawUnsafe(`SELECT 1;`);
+        await client.$queryRawUnsafe(`SELECT 1;`);
         this.logger.log(`✅ Tenant '${tenant.name}' conectado com sucesso. Schema: ${tenant.schemaUrl}`);
         success++;
-      } catch (err) {
+      } catch (err:any) {
         this.logger.error(`❌ Falha na conexão do tenant '${tenant.name}' (${tenant.schemaUrl}): ${err.message}`);
         fail++;
       }

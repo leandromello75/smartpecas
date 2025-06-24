@@ -12,20 +12,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.CreateTenantDto = void 0;
 const class_validator_1 = require("class-validator");
 class CreateTenantDto {
-    name;
-    cnpj;
-    email;
-    adminName;
-    password;
-    phone;
-    address;
-    city;
-    state;
-    zipCode;
-    logo;
-    favicon;
-    theme;
-    settings;
 }
 exports.CreateTenantDto = CreateTenantDto;
 __decorate([

@@ -15,8 +15,8 @@
 import { Request } from 'express';
 import { TenantContext } from '../tenant-context/tenant-context.service';
 
-declare module 'express' {
-  interface Request {
-    tenantContext?: TenantContext;
-  }
+// ✅ CORREÇÃO: A interface agora estende 'Request' e adiciona a propriedade 'tenant',
+// fazendo com que o import seja utilizado corretamente.
+export interface RequestWithTenant extends Request {
+  tenant: TenantContext;
 }

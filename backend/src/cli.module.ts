@@ -14,7 +14,7 @@
 // =============================================================================
 
 import { Module } from '@nestjs/common';
-import { CheckTenantsCommand } from './cli/check-tenants.command'; // Caminho ajustado para a sua estrutura
+import { CheckTenantsCommand } from './cli/commands/check-tenants.command'; // Caminho ajustado para a sua estrutura
 import { PrismaService } from './prisma/prisma.service'; // Necessário para injeção no comando CLI
 import { TenantService } from './tenant/tenant.service'; // Necessário se comandos futuros usarem TenantService
 

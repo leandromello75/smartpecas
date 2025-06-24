@@ -15,31 +15,34 @@ const passport_jwt_1 = require("passport-jwt");
 const passport_1 = require("@nestjs/passport");
 const common_1 = require("@nestjs/common");
 const config_1 = require("@nestjs/config");
+const prisma_service_1 = require("../../prisma/prisma.service");
 let JwtAdminStrategy = JwtAdminStrategy_1 = class JwtAdminStrategy extends (0, passport_1.PassportStrategy)(passport_jwt_1.Strategy, 'jwt-admin') {
-    configService;
-    logger = new common_1.Logger(JwtAdminStrategy_1.name);
-    constructor(configService) {
+    constructor(configService, prisma) {
         super({
             jwtFromRequest: passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(),
             ignoreExpiration: false,
             secretOrKey: configService.get('JWT_SECRET'),
         });
-        this.configService = configService;
+        this.prisma = prisma;
+        this.logger = new common_1.Logger(JwtAdminStrategy_1.name);
     }
     async validate(payload) {
-        if (!payload?.sub || !payload?.email || !payload?.role) {
-            this.logger.warn(`Payload JWT inválido recebido: ${JSON.stringify(payload)}`);
-            throw new common_1.UnauthorizedException('Token JWT inválido ou malformado.');
+        this.logger.debug(`Validando token JWT para admin: ${payload.email}`);
+        const adminUser = await this.prisma.adminUser.findUnique({
+            where: { id: payload.sub },
+        });
+        if (!adminUser || !adminUser.isActive) {
+            this.logger.warn(`AdminUser do token JWT inválido ou inativo: ${payload.email}`);
+            throw new common_1.UnauthorizedException('Token inválido ou usuário removido.');
         }
-        if (process.env.NODE_ENV !== 'production') {
-            this.logger.debug(`Admin autenticado via JWT: ${payload.email}`);
-        }
-        return payload;
+        const { password, ...result } = adminUser;
+        return result;
     }
 };
 exports.JwtAdminStrategy = JwtAdminStrategy;
 exports.JwtAdminStrategy = JwtAdminStrategy = JwtAdminStrategy_1 = __decorate([
     (0, common_1.Injectable)(),
-    __metadata("design:paramtypes", [config_1.ConfigService])
+    __metadata("design:paramtypes", [config_1.ConfigService,
+        prisma_service_1.PrismaService])
 ], JwtAdminStrategy);
 //# sourceMappingURL=jwt-admin.strategy.js.map

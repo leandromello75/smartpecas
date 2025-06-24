@@ -48,90 +48,69 @@ const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const bcrypt = __importStar(require("bcrypt"));
 let TenantService = TenantService_1 = class TenantService {
-    prisma;
-    logger = new common_1.Logger(TenantService_1.name);
     constructor(prisma) {
         this.prisma = prisma;
+        this.logger = new common_1.Logger(TenantService_1.name);
     }
     async create(createTenantDto) {
-        const { cnpj, email, name, adminName, password, ...rest } = createTenantDto;
-        const schemaUrl = `tenant_${this.generateSlug(name || cnpj)}_${this.generateUniqueSuffix()}`;
+        const { cnpj, email, name, adminName, password } = createTenantDto;
         const existingTenant = await this.prisma.tenant.findFirst({
-            where: {
-                OR: [{ cnpj }, { name }],
-            },
+            where: { OR: [{ cnpj: cnpj }, { name }] },
         });
         if (existingTenant) {
-            if (existingTenant.cnpj === cnpj) {
-                throw new common_1.ConflictException(`Um inquilino com o CNPJ '${cnpj}' já existe.`);
-            }
-            if (existingTenant.name === name) {
-                throw new common_1.ConflictException(`Um inquilino com o nome '${name}' já existe.`);
-            }
+            const field = existingTenant.cnpj === cnpj ? 'CNPJ' : 'nome';
+            throw new common_1.ConflictException(`Um inquilino com este ${field} já existe.`);
         }
-        const existingAdminUser = await this.prisma.adminUser.findUnique({
+        const existingAdmin = await this.prisma.adminUser.findUnique({
             where: { email },
         });
-        if (existingAdminUser) {
-            throw new common_1.ConflictException(`Um usuário administrador global com o e-mail '${email}' já existe.`);
+        if (existingAdmin) {
+            throw new common_1.ConflictException(`Um usuário administrador com o e-mail '${email}' já existe.`);
         }
+        const schemaUrl = `tenant_${this.generateSlug(name)}_${this.generateUniqueSuffix()}`;
         try {
-            const tenant = await this.prisma.$transaction(async (prismaTx) => {
-                const createdTenant = await prismaTx.tenant.create({
-                    data: {
-                        name,
-                        cnpj,
-                        email,
-                        schemaUrl,
-                        isActive: true,
-                        ...rest,
+            const hashedPassword = await bcrypt.hash(password, 10);
+            const newTenant = await this.prisma.tenant.create({
+                data: {
+                    name,
+                    cnpj,
+                    schemaUrl,
+                    adminUsers: {
+                        create: {
+                            email,
+                            password: hashedPassword,
+                            name: adminName,
+                        },
                     },
-                });
-                this.logger.log(`Tenant '${name}' criado no schema público.`);
-                await this.prisma.createTenantSchema(schemaUrl);
-                const hashedPassword = await bcrypt.hash(password, 10);
-                await prismaTx.adminUser.create({
-                    data: {
-                        name: adminName,
-                        email,
-                        password: hashedPassword,
-                        tenantId: createdTenant.id,
-                        role: 'tenant_admin',
-                    },
-                });
-                this.logger.log(`AdminUser criado para tenant '${schemaUrl}'`);
-                return createdTenant;
+                },
             });
-            return tenant;
+            this.logger.log(`Tenant '${newTenant.name}' e Admin User criados no banco.`);
+            await this.prisma.createTenantSchema(schemaUrl);
+            return newTenant;
         }
         catch (error) {
             this.logger.error(`Erro ao criar tenant '${name}':`, error.stack);
-            throw new common_1.InternalServerErrorException(`Erro ao criar o tenant '${name}': ${error.message}`);
+            throw new common_1.InternalServerErrorException('Não foi possível criar o tenant.');
         }
     }
     async findOne(id) {
-        const tenant = await this.prisma.getTenantById(id);
+        const tenant = await this.prisma.tenant.findUnique({ where: { id } });
         if (!tenant) {
             throw new common_1.NotFoundException(`Inquilino com ID '${id}' não encontrado.`);
         }
         return tenant;
     }
     async findAll() {
-        return this.prisma.getActiveTenants();
+        return this.prisma.tenant.findMany({
+            where: { isActive: true },
+            orderBy: { name: 'asc' },
+        });
     }
     generateSlug(text) {
-        return text
-            .toString()
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .toLowerCase()
-            .trim()
-            .replace(/\s+/g, '_')
-            .replace(/[^\w-]+/g, '')
-            .replace(/--+/g, '_');
+        return text.toString().toLowerCase().trim().replace(/\s+/g, '_').replace(/[^\w-]+/g, '');
     }
     generateUniqueSuffix() {
-        return `${Date.now()}_${Math.floor(1000 + Math.random() * 9000)}`;
+        return `${Date.now()}`.slice(-6);
     }
 };
 exports.TenantService = TenantService;

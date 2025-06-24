@@ -16,11 +16,10 @@ const passport_1 = require("@nestjs/passport");
 const common_1 = require("@nestjs/common");
 const auth_service_1 = require("../auth.service");
 let LocalAdminStrategy = LocalAdminStrategy_1 = class LocalAdminStrategy extends (0, passport_1.PassportStrategy)(passport_local_1.Strategy, 'local-admin') {
-    authService;
-    logger = new common_1.Logger(LocalAdminStrategy_1.name);
     constructor(authService) {
         super({ usernameField: 'email', passwordField: 'password' });
         this.authService = authService;
+        this.logger = new common_1.Logger(LocalAdminStrategy_1.name);
     }
     async validate(email, password) {
         this.logger.debug(`Executando validação local para admin: ${email}`);

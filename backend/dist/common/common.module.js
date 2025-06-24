@@ -8,14 +8,22 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CommonModule = void 0;
 const common_1 = require("@nestjs/common");
+const core_1 = require("@nestjs/core");
 const tenant_context_service_1 = require("./tenant-context/tenant-context.service");
+const tenant_interceptor_1 = require("./interceptors/tenant.interceptor");
 let CommonModule = class CommonModule {
 };
 exports.CommonModule = CommonModule;
 exports.CommonModule = CommonModule = __decorate([
     (0, common_1.Global)(),
     (0, common_1.Module)({
-        providers: [tenant_context_service_1.TenantContextService],
+        providers: [
+            tenant_context_service_1.TenantContextService,
+            {
+                provide: core_1.APP_INTERCEPTOR,
+                useClass: tenant_interceptor_1.TenantInterceptor,
+            },
+        ],
         exports: [tenant_context_service_1.TenantContextService],
     })
 ], CommonModule);

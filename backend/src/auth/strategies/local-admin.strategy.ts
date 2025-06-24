@@ -21,7 +21,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { AuthService } from '../auth.service';
-import { AdminUser } from '@prisma/client';
+import { AdminUser } from '@/public-client';
 
 @Injectable()
 export class LocalAdminStrategy extends PassportStrategy(Strategy, 'local-admin') {
