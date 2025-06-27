@@ -3,9 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AdminUser } from '@/public-client';
 import { JwtAdminPayload } from '@/types/jwt/jwt-admin-payload.interface';
-declare const JwtAdminStrategy_base: new (...args: [opt: import("passport-jwt").StrategyOptionsWithRequest] | [opt: import("passport-jwt").StrategyOptionsWithoutRequest]) => Strategy & {
-    validate(...args: any[]): unknown;
-};
+declare const JwtAdminStrategy_base: new (...args: any[]) => Strategy;
 export declare class JwtAdminStrategy extends JwtAdminStrategy_base {
     private prisma;
     private readonly logger;

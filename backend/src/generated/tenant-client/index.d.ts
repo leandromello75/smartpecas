@@ -443,7 +443,7 @@ export namespace Prisma {
 
   /**
    * Prisma Client JS version: 6.10.1
-   * Query Engine version: 9b628578b3b7cae625e8c927178f15a170e74a9c
+   * Query Engine version: 605197351a3c8bdd595af2d2a9bc3025bca48ea2
    */
   export type PrismaVersion = {
     client: string
@@ -908,10 +908,6 @@ export namespace Prisma {
             args: Prisma.TenantUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
-          updateManyAndReturn: {
-            args: Prisma.TenantUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$TenantPayload>[]
-          }
           upsert: {
             args: Prisma.TenantUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$TenantPayload>
@@ -981,10 +977,6 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.UserUpdateManyArgs<ExtArgs>
             result: BatchPayload
-          }
-          updateManyAndReturn: {
-            args: Prisma.UserUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$UserPayload>[]
           }
           upsert: {
             args: Prisma.UserUpsertArgs<ExtArgs>
@@ -1056,10 +1048,6 @@ export namespace Prisma {
             args: Prisma.ProductUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
-          updateManyAndReturn: {
-            args: Prisma.ProductUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ProductPayload>[]
-          }
           upsert: {
             args: Prisma.ProductUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$ProductPayload>
@@ -1129,10 +1117,6 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.ClienteUpdateManyArgs<ExtArgs>
             result: BatchPayload
-          }
-          updateManyAndReturn: {
-            args: Prisma.ClienteUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ClientePayload>[]
           }
           upsert: {
             args: Prisma.ClienteUpsertArgs<ExtArgs>
@@ -1204,10 +1188,6 @@ export namespace Prisma {
             args: Prisma.EnderecoClienteUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
-          updateManyAndReturn: {
-            args: Prisma.EnderecoClienteUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$EnderecoClientePayload>[]
-          }
           upsert: {
             args: Prisma.EnderecoClienteUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$EnderecoClientePayload>
@@ -1277,10 +1257,6 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.ContatoClienteUpdateManyArgs<ExtArgs>
             result: BatchPayload
-          }
-          updateManyAndReturn: {
-            args: Prisma.ContatoClienteUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$ContatoClientePayload>[]
           }
           upsert: {
             args: Prisma.ContatoClienteUpsertArgs<ExtArgs>
@@ -1352,10 +1328,6 @@ export namespace Prisma {
             args: Prisma.VeiculoClienteUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
-          updateManyAndReturn: {
-            args: Prisma.VeiculoClienteUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$VeiculoClientePayload>[]
-          }
           upsert: {
             args: Prisma.VeiculoClienteUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$VeiculoClientePayload>
@@ -1425,10 +1397,6 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.HistoricoClienteUpdateManyArgs<ExtArgs>
             result: BatchPayload
-          }
-          updateManyAndReturn: {
-            args: Prisma.HistoricoClienteUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$HistoricoClientePayload>[]
           }
           upsert: {
             args: Prisma.HistoricoClienteUpsertArgs<ExtArgs>
@@ -1500,10 +1468,6 @@ export namespace Prisma {
             args: Prisma.OrderUpdateManyArgs<ExtArgs>
             result: BatchPayload
           }
-          updateManyAndReturn: {
-            args: Prisma.OrderUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$OrderPayload>[]
-          }
           upsert: {
             args: Prisma.OrderUpsertArgs<ExtArgs>
             result: $Utils.PayloadToResult<Prisma.$OrderPayload>
@@ -1573,10 +1537,6 @@ export namespace Prisma {
           updateMany: {
             args: Prisma.OrderItemUpdateManyArgs<ExtArgs>
             result: BatchPayload
-          }
-          updateManyAndReturn: {
-            args: Prisma.OrderItemUpdateManyAndReturnArgs<ExtArgs>
-            result: $Utils.PayloadToResult<Prisma.$OrderItemPayload>[]
           }
           upsert: {
             args: Prisma.OrderItemUpsertArgs<ExtArgs>
@@ -2144,9 +2104,6 @@ export namespace Prisma {
     id?: boolean
   }, ExtArgs["result"]["tenant"]>
 
-  export type TenantSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-  }, ExtArgs["result"]["tenant"]>
 
   export type TenantSelectScalar = {
     id?: boolean
@@ -2161,7 +2118,6 @@ export namespace Prisma {
     _count?: boolean | TenantCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type TenantIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
-  export type TenantIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
   export type $TenantPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Tenant"
@@ -2377,36 +2333,6 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends TenantUpdateManyArgs>(args: SelectSubset<T, TenantUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more Tenants and returns the data updated in the database.
-     * @param {TenantUpdateManyAndReturnArgs} args - Arguments to update many Tenants.
-     * @example
-     * // Update many Tenants
-     * const tenant = await prisma.tenant.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more Tenants and only return the `id`
-     * const tenantWithIdOnly = await prisma.tenant.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends TenantUpdateManyAndReturnArgs>(args: SelectSubset<T, TenantUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one Tenant.
@@ -2890,36 +2816,6 @@ export namespace Prisma {
      * Filter which Tenants to update
      */
     where?: TenantWhereInput
-    /**
-     * Limit how many Tenants to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * Tenant updateManyAndReturn
-   */
-  export type TenantUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Tenant
-     */
-    select?: TenantSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the Tenant
-     */
-    omit?: TenantOmit<ExtArgs> | null
-    /**
-     * The data used to update Tenants.
-     */
-    data: XOR<TenantUpdateManyMutationInput, TenantUncheckedUpdateManyInput>
-    /**
-     * Filter which Tenants to update
-     */
-    where?: TenantWhereInput
-    /**
-     * Limit how many Tenants to update.
-     */
-    limit?: number
   }
 
   /**
@@ -2982,10 +2878,6 @@ export namespace Prisma {
      * Filter which Tenants to delete
      */
     where?: TenantWhereInput
-    /**
-     * Limit how many Tenants to delete.
-     */
-    limit?: number
   }
 
   /**
@@ -3317,18 +3209,6 @@ export namespace Prisma {
     tenant?: boolean | TenantDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
-  export type UserSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    email?: boolean
-    password?: boolean
-    name?: boolean
-    role?: boolean
-    isActive?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    tenantId?: boolean
-    tenant?: boolean | TenantDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["user"]>
 
   export type UserSelectScalar = {
     id?: boolean
@@ -3349,9 +3229,6 @@ export namespace Prisma {
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    tenant?: boolean | TenantDefaultArgs<ExtArgs>
-  }
-  export type UserIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     tenant?: boolean | TenantDefaultArgs<ExtArgs>
   }
 
@@ -3575,36 +3452,6 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends UserUpdateManyArgs>(args: SelectSubset<T, UserUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more Users and returns the data updated in the database.
-     * @param {UserUpdateManyAndReturnArgs} args - Arguments to update many Users.
-     * @example
-     * // Update many Users
-     * const user = await prisma.user.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more Users and only return the `id`
-     * const userWithIdOnly = await prisma.user.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends UserUpdateManyAndReturnArgs>(args: SelectSubset<T, UserUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one User.
@@ -4098,40 +3945,6 @@ export namespace Prisma {
      * Filter which Users to update
      */
     where?: UserWhereInput
-    /**
-     * Limit how many Users to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * User updateManyAndReturn
-   */
-  export type UserUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the User
-     */
-    select?: UserSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the User
-     */
-    omit?: UserOmit<ExtArgs> | null
-    /**
-     * The data used to update Users.
-     */
-    data: XOR<UserUpdateManyMutationInput, UserUncheckedUpdateManyInput>
-    /**
-     * Filter which Users to update
-     */
-    where?: UserWhereInput
-    /**
-     * Limit how many Users to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: UserIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -4194,10 +4007,6 @@ export namespace Prisma {
      * Filter which Users to delete
      */
     where?: UserWhereInput
-    /**
-     * Limit how many Users to delete.
-     */
-    limit?: number
   }
 
   /**
@@ -4482,17 +4291,6 @@ export namespace Prisma {
     tenant?: boolean | TenantDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["product"]>
 
-  export type ProductSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    name?: boolean
-    description?: boolean
-    price?: boolean
-    sku?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    tenantId?: boolean
-    tenant?: boolean | TenantDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["product"]>
 
   export type ProductSelectScalar = {
     id?: boolean
@@ -4512,9 +4310,6 @@ export namespace Prisma {
     _count?: boolean | ProductCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ProductIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    tenant?: boolean | TenantDefaultArgs<ExtArgs>
-  }
-  export type ProductIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     tenant?: boolean | TenantDefaultArgs<ExtArgs>
   }
 
@@ -4737,36 +4532,6 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends ProductUpdateManyArgs>(args: SelectSubset<T, ProductUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more Products and returns the data updated in the database.
-     * @param {ProductUpdateManyAndReturnArgs} args - Arguments to update many Products.
-     * @example
-     * // Update many Products
-     * const product = await prisma.product.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more Products and only return the `id`
-     * const productWithIdOnly = await prisma.product.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends ProductUpdateManyAndReturnArgs>(args: SelectSubset<T, ProductUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one Product.
@@ -5259,40 +5024,6 @@ export namespace Prisma {
      * Filter which Products to update
      */
     where?: ProductWhereInput
-    /**
-     * Limit how many Products to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * Product updateManyAndReturn
-   */
-  export type ProductUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Product
-     */
-    select?: ProductSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the Product
-     */
-    omit?: ProductOmit<ExtArgs> | null
-    /**
-     * The data used to update Products.
-     */
-    data: XOR<ProductUpdateManyMutationInput, ProductUncheckedUpdateManyInput>
-    /**
-     * Filter which Products to update
-     */
-    where?: ProductWhereInput
-    /**
-     * Limit how many Products to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ProductIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -5355,10 +5086,6 @@ export namespace Prisma {
      * Filter which Products to delete
      */
     where?: ProductWhereInput
-    /**
-     * Limit how many Products to delete.
-     */
-    limit?: number
   }
 
   /**
@@ -6159,73 +5886,6 @@ export namespace Prisma {
     tenant?: boolean | TenantDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["cliente"]>
 
-  export type ClienteSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    tipoCliente?: boolean
-    nome?: boolean
-    nomeFantasia?: boolean
-    documento?: boolean
-    documentoTipo?: boolean
-    documentoValido?: boolean
-    documentoValidadoEm?: boolean
-    inscricaoEstadual?: boolean
-    inscricaoMunicipal?: boolean
-    email?: boolean
-    telefone?: boolean
-    celular?: boolean
-    website?: boolean
-    cep?: boolean
-    logradouro?: boolean
-    numero?: boolean
-    complemento?: boolean
-    bairro?: boolean
-    cidade?: boolean
-    estado?: boolean
-    pais?: boolean
-    isInadimplente?: boolean
-    limiteCredito?: boolean
-    limiteCreditoUsado?: boolean
-    diasPagamento?: boolean
-    formaPagamentoPadrao?: boolean
-    descontoMaximo?: boolean
-    comissaoVendedor?: boolean
-    observacoes?: boolean
-    tipoNegocio?: boolean
-    especialidades?: boolean
-    marcasAtendidas?: boolean
-    certificacoes?: boolean
-    temOficina?: boolean
-    temBalcao?: boolean
-    totalPedidos?: boolean
-    valorTotalCompras?: boolean
-    ultimaCompra?: boolean
-    frequenciaCompra?: boolean
-    scoreCliente?: boolean
-    acessoRestrito?: boolean
-    gruposAcesso?: boolean
-    nivelConfidencialidade?: boolean
-    isAtivo?: boolean
-    deletedAt?: boolean
-    deletedBy?: boolean
-    deleteReason?: boolean
-    criadoEm?: boolean
-    atualizadoEm?: boolean
-    criadoPor?: boolean
-    criadoPorNome?: boolean
-    criadoPorIp?: boolean
-    atualizadoPor?: boolean
-    atualizadoPorNome?: boolean
-    atualizadoPorIp?: boolean
-    versao?: boolean
-    anoMes?: boolean
-    trimestre?: boolean
-    dadosCnpjApi?: boolean
-    dadosCepApi?: boolean
-    ultimaConsultaCnpj?: boolean
-    ultimaConsultaCep?: boolean
-    tenantId?: boolean
-    tenant?: boolean | TenantDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["cliente"]>
 
   export type ClienteSelectScalar = {
     id?: boolean
@@ -6305,9 +5965,6 @@ export namespace Prisma {
     _count?: boolean | ClienteCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type ClienteIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    tenant?: boolean | TenantDefaultArgs<ExtArgs>
-  }
-  export type ClienteIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     tenant?: boolean | TenantDefaultArgs<ExtArgs>
   }
 
@@ -6590,36 +6247,6 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends ClienteUpdateManyArgs>(args: SelectSubset<T, ClienteUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more Clientes and returns the data updated in the database.
-     * @param {ClienteUpdateManyAndReturnArgs} args - Arguments to update many Clientes.
-     * @example
-     * // Update many Clientes
-     * const cliente = await prisma.cliente.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more Clientes and only return the `id`
-     * const clienteWithIdOnly = await prisma.cliente.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends ClienteUpdateManyAndReturnArgs>(args: SelectSubset<T, ClienteUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ClientePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one Cliente.
@@ -7172,40 +6799,6 @@ export namespace Prisma {
      * Filter which Clientes to update
      */
     where?: ClienteWhereInput
-    /**
-     * Limit how many Clientes to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * Cliente updateManyAndReturn
-   */
-  export type ClienteUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Cliente
-     */
-    select?: ClienteSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the Cliente
-     */
-    omit?: ClienteOmit<ExtArgs> | null
-    /**
-     * The data used to update Clientes.
-     */
-    data: XOR<ClienteUpdateManyMutationInput, ClienteUncheckedUpdateManyInput>
-    /**
-     * Filter which Clientes to update
-     */
-    where?: ClienteWhereInput
-    /**
-     * Limit how many Clientes to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ClienteIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -7268,10 +6861,6 @@ export namespace Prisma {
      * Filter which Clientes to delete
      */
     where?: ClienteWhereInput
-    /**
-     * Limit how many Clientes to delete.
-     */
-    limit?: number
   }
 
   /**
@@ -7688,25 +7277,6 @@ export namespace Prisma {
     cliente?: boolean | ClienteDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["enderecoCliente"]>
 
-  export type EnderecoClienteSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    clienteId?: boolean
-    tipo?: boolean
-    descricao?: boolean
-    cep?: boolean
-    logradouro?: boolean
-    numero?: boolean
-    complemento?: boolean
-    bairro?: boolean
-    cidade?: boolean
-    estado?: boolean
-    pais?: boolean
-    isPrincipal?: boolean
-    isAtivo?: boolean
-    criadoEm?: boolean
-    atualizadoEm?: boolean
-    cliente?: boolean | ClienteDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["enderecoCliente"]>
 
   export type EnderecoClienteSelectScalar = {
     id?: boolean
@@ -7732,9 +7302,6 @@ export namespace Prisma {
     cliente?: boolean | ClienteDefaultArgs<ExtArgs>
   }
   export type EnderecoClienteIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    cliente?: boolean | ClienteDefaultArgs<ExtArgs>
-  }
-  export type EnderecoClienteIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     cliente?: boolean | ClienteDefaultArgs<ExtArgs>
   }
 
@@ -7964,36 +7531,6 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends EnderecoClienteUpdateManyArgs>(args: SelectSubset<T, EnderecoClienteUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more EnderecoClientes and returns the data updated in the database.
-     * @param {EnderecoClienteUpdateManyAndReturnArgs} args - Arguments to update many EnderecoClientes.
-     * @example
-     * // Update many EnderecoClientes
-     * const enderecoCliente = await prisma.enderecoCliente.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more EnderecoClientes and only return the `id`
-     * const enderecoClienteWithIdOnly = await prisma.enderecoCliente.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends EnderecoClienteUpdateManyAndReturnArgs>(args: SelectSubset<T, EnderecoClienteUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$EnderecoClientePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one EnderecoCliente.
@@ -8493,40 +8030,6 @@ export namespace Prisma {
      * Filter which EnderecoClientes to update
      */
     where?: EnderecoClienteWhereInput
-    /**
-     * Limit how many EnderecoClientes to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * EnderecoCliente updateManyAndReturn
-   */
-  export type EnderecoClienteUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the EnderecoCliente
-     */
-    select?: EnderecoClienteSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the EnderecoCliente
-     */
-    omit?: EnderecoClienteOmit<ExtArgs> | null
-    /**
-     * The data used to update EnderecoClientes.
-     */
-    data: XOR<EnderecoClienteUpdateManyMutationInput, EnderecoClienteUncheckedUpdateManyInput>
-    /**
-     * Filter which EnderecoClientes to update
-     */
-    where?: EnderecoClienteWhereInput
-    /**
-     * Limit how many EnderecoClientes to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: EnderecoClienteIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -8589,10 +8092,6 @@ export namespace Prisma {
      * Filter which EnderecoClientes to delete
      */
     where?: EnderecoClienteWhereInput
-    /**
-     * Limit how many EnderecoClientes to delete.
-     */
-    limit?: number
   }
 
   /**
@@ -8853,21 +8352,6 @@ export namespace Prisma {
     cliente?: boolean | ClienteDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["contatoCliente"]>
 
-  export type ContatoClienteSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    clienteId?: boolean
-    nome?: boolean
-    cargo?: boolean
-    email?: boolean
-    telefone?: boolean
-    celular?: boolean
-    observacoes?: boolean
-    isPrincipal?: boolean
-    isAtivo?: boolean
-    criadoEm?: boolean
-    atualizadoEm?: boolean
-    cliente?: boolean | ClienteDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["contatoCliente"]>
 
   export type ContatoClienteSelectScalar = {
     id?: boolean
@@ -8889,9 +8373,6 @@ export namespace Prisma {
     cliente?: boolean | ClienteDefaultArgs<ExtArgs>
   }
   export type ContatoClienteIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    cliente?: boolean | ClienteDefaultArgs<ExtArgs>
-  }
-  export type ContatoClienteIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     cliente?: boolean | ClienteDefaultArgs<ExtArgs>
   }
 
@@ -9117,36 +8598,6 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends ContatoClienteUpdateManyArgs>(args: SelectSubset<T, ContatoClienteUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more ContatoClientes and returns the data updated in the database.
-     * @param {ContatoClienteUpdateManyAndReturnArgs} args - Arguments to update many ContatoClientes.
-     * @example
-     * // Update many ContatoClientes
-     * const contatoCliente = await prisma.contatoCliente.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more ContatoClientes and only return the `id`
-     * const contatoClienteWithIdOnly = await prisma.contatoCliente.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends ContatoClienteUpdateManyAndReturnArgs>(args: SelectSubset<T, ContatoClienteUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ContatoClientePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one ContatoCliente.
@@ -9642,40 +9093,6 @@ export namespace Prisma {
      * Filter which ContatoClientes to update
      */
     where?: ContatoClienteWhereInput
-    /**
-     * Limit how many ContatoClientes to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * ContatoCliente updateManyAndReturn
-   */
-  export type ContatoClienteUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the ContatoCliente
-     */
-    select?: ContatoClienteSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the ContatoCliente
-     */
-    omit?: ContatoClienteOmit<ExtArgs> | null
-    /**
-     * The data used to update ContatoClientes.
-     */
-    data: XOR<ContatoClienteUpdateManyMutationInput, ContatoClienteUncheckedUpdateManyInput>
-    /**
-     * Filter which ContatoClientes to update
-     */
-    where?: ContatoClienteWhereInput
-    /**
-     * Limit how many ContatoClientes to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: ContatoClienteIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -9738,10 +9155,6 @@ export namespace Prisma {
      * Filter which ContatoClientes to delete
      */
     where?: ContatoClienteWhereInput
-    /**
-     * Limit how many ContatoClientes to delete.
-     */
-    limit?: number
   }
 
   /**
@@ -10053,22 +9466,6 @@ export namespace Prisma {
     cliente?: boolean | ClienteDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["veiculoCliente"]>
 
-  export type VeiculoClienteSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    clienteId?: boolean
-    veiculoGlobalId?: boolean
-    placa?: boolean
-    cor?: boolean
-    anoFabricacao?: boolean
-    anoModelo?: boolean
-    quilometragem?: boolean
-    observacoes?: boolean
-    isPrincipal?: boolean
-    isAtivo?: boolean
-    criadoEm?: boolean
-    atualizadoEm?: boolean
-    cliente?: boolean | ClienteDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["veiculoCliente"]>
 
   export type VeiculoClienteSelectScalar = {
     id?: boolean
@@ -10091,9 +9488,6 @@ export namespace Prisma {
     cliente?: boolean | ClienteDefaultArgs<ExtArgs>
   }
   export type VeiculoClienteIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    cliente?: boolean | ClienteDefaultArgs<ExtArgs>
-  }
-  export type VeiculoClienteIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     cliente?: boolean | ClienteDefaultArgs<ExtArgs>
   }
 
@@ -10320,36 +9714,6 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends VeiculoClienteUpdateManyArgs>(args: SelectSubset<T, VeiculoClienteUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more VeiculoClientes and returns the data updated in the database.
-     * @param {VeiculoClienteUpdateManyAndReturnArgs} args - Arguments to update many VeiculoClientes.
-     * @example
-     * // Update many VeiculoClientes
-     * const veiculoCliente = await prisma.veiculoCliente.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more VeiculoClientes and only return the `id`
-     * const veiculoClienteWithIdOnly = await prisma.veiculoCliente.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends VeiculoClienteUpdateManyAndReturnArgs>(args: SelectSubset<T, VeiculoClienteUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$VeiculoClientePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one VeiculoCliente.
@@ -10846,40 +10210,6 @@ export namespace Prisma {
      * Filter which VeiculoClientes to update
      */
     where?: VeiculoClienteWhereInput
-    /**
-     * Limit how many VeiculoClientes to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * VeiculoCliente updateManyAndReturn
-   */
-  export type VeiculoClienteUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the VeiculoCliente
-     */
-    select?: VeiculoClienteSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the VeiculoCliente
-     */
-    omit?: VeiculoClienteOmit<ExtArgs> | null
-    /**
-     * The data used to update VeiculoClientes.
-     */
-    data: XOR<VeiculoClienteUpdateManyMutationInput, VeiculoClienteUncheckedUpdateManyInput>
-    /**
-     * Filter which VeiculoClientes to update
-     */
-    where?: VeiculoClienteWhereInput
-    /**
-     * Limit how many VeiculoClientes to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: VeiculoClienteIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -10942,10 +10272,6 @@ export namespace Prisma {
      * Filter which VeiculoClientes to delete
      */
     where?: VeiculoClienteWhereInput
-    /**
-     * Limit how many VeiculoClientes to delete.
-     */
-    limit?: number
   }
 
   /**
@@ -11204,17 +10530,6 @@ export namespace Prisma {
     cliente?: boolean | ClienteDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["historicoCliente"]>
 
-  export type HistoricoClienteSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    clienteId?: boolean
-    tipo?: boolean
-    descricao?: boolean
-    valor?: boolean
-    observacoes?: boolean
-    criadoEm?: boolean
-    criadoPor?: boolean
-    cliente?: boolean | ClienteDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["historicoCliente"]>
 
   export type HistoricoClienteSelectScalar = {
     id?: boolean
@@ -11232,9 +10547,6 @@ export namespace Prisma {
     cliente?: boolean | ClienteDefaultArgs<ExtArgs>
   }
   export type HistoricoClienteIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    cliente?: boolean | ClienteDefaultArgs<ExtArgs>
-  }
-  export type HistoricoClienteIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     cliente?: boolean | ClienteDefaultArgs<ExtArgs>
   }
 
@@ -11456,36 +10768,6 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends HistoricoClienteUpdateManyArgs>(args: SelectSubset<T, HistoricoClienteUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more HistoricoClientes and returns the data updated in the database.
-     * @param {HistoricoClienteUpdateManyAndReturnArgs} args - Arguments to update many HistoricoClientes.
-     * @example
-     * // Update many HistoricoClientes
-     * const historicoCliente = await prisma.historicoCliente.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more HistoricoClientes and only return the `id`
-     * const historicoClienteWithIdOnly = await prisma.historicoCliente.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends HistoricoClienteUpdateManyAndReturnArgs>(args: SelectSubset<T, HistoricoClienteUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$HistoricoClientePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one HistoricoCliente.
@@ -11977,40 +11259,6 @@ export namespace Prisma {
      * Filter which HistoricoClientes to update
      */
     where?: HistoricoClienteWhereInput
-    /**
-     * Limit how many HistoricoClientes to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * HistoricoCliente updateManyAndReturn
-   */
-  export type HistoricoClienteUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the HistoricoCliente
-     */
-    select?: HistoricoClienteSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the HistoricoCliente
-     */
-    omit?: HistoricoClienteOmit<ExtArgs> | null
-    /**
-     * The data used to update HistoricoClientes.
-     */
-    data: XOR<HistoricoClienteUpdateManyMutationInput, HistoricoClienteUncheckedUpdateManyInput>
-    /**
-     * Filter which HistoricoClientes to update
-     */
-    where?: HistoricoClienteWhereInput
-    /**
-     * Limit how many HistoricoClientes to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: HistoricoClienteIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -12073,10 +11321,6 @@ export namespace Prisma {
      * Filter which HistoricoClientes to delete
      */
     where?: HistoricoClienteWhereInput
-    /**
-     * Limit how many HistoricoClientes to delete.
-     */
-    limit?: number
   }
 
   /**
@@ -12350,20 +11594,6 @@ export namespace Prisma {
     user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["order"]>
 
-  export type OrderSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    orderDate?: boolean
-    totalAmount?: boolean
-    status?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    tenantId?: boolean
-    customerId?: boolean
-    userId?: boolean
-    tenant?: boolean | TenantDefaultArgs<ExtArgs>
-    customer?: boolean | ClienteDefaultArgs<ExtArgs>
-    user?: boolean | UserDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["order"]>
 
   export type OrderSelectScalar = {
     id?: boolean
@@ -12386,11 +11616,6 @@ export namespace Prisma {
     _count?: boolean | OrderCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type OrderIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    tenant?: boolean | TenantDefaultArgs<ExtArgs>
-    customer?: boolean | ClienteDefaultArgs<ExtArgs>
-    user?: boolean | UserDefaultArgs<ExtArgs>
-  }
-  export type OrderIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     tenant?: boolean | TenantDefaultArgs<ExtArgs>
     customer?: boolean | ClienteDefaultArgs<ExtArgs>
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -12618,36 +11843,6 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends OrderUpdateManyArgs>(args: SelectSubset<T, OrderUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more Orders and returns the data updated in the database.
-     * @param {OrderUpdateManyAndReturnArgs} args - Arguments to update many Orders.
-     * @example
-     * // Update many Orders
-     * const order = await prisma.order.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more Orders and only return the `id`
-     * const orderWithIdOnly = await prisma.order.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends OrderUpdateManyAndReturnArgs>(args: SelectSubset<T, OrderUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one Order.
@@ -13143,40 +12338,6 @@ export namespace Prisma {
      * Filter which Orders to update
      */
     where?: OrderWhereInput
-    /**
-     * Limit how many Orders to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * Order updateManyAndReturn
-   */
-  export type OrderUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Order
-     */
-    select?: OrderSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the Order
-     */
-    omit?: OrderOmit<ExtArgs> | null
-    /**
-     * The data used to update Orders.
-     */
-    data: XOR<OrderUpdateManyMutationInput, OrderUncheckedUpdateManyInput>
-    /**
-     * Filter which Orders to update
-     */
-    where?: OrderWhereInput
-    /**
-     * Limit how many Orders to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: OrderIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -13239,10 +12400,6 @@ export namespace Prisma {
      * Filter which Orders to delete
      */
     where?: OrderWhereInput
-    /**
-     * Limit how many Orders to delete.
-     */
-    limit?: number
   }
 
   /**
@@ -13504,15 +12661,6 @@ export namespace Prisma {
     product?: boolean | ProductDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["orderItem"]>
 
-  export type OrderItemSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
-    id?: boolean
-    quantity?: boolean
-    unitPrice?: boolean
-    orderId?: boolean
-    productId?: boolean
-    order?: boolean | OrderDefaultArgs<ExtArgs>
-    product?: boolean | ProductDefaultArgs<ExtArgs>
-  }, ExtArgs["result"]["orderItem"]>
 
   export type OrderItemSelectScalar = {
     id?: boolean
@@ -13528,10 +12676,6 @@ export namespace Prisma {
     product?: boolean | ProductDefaultArgs<ExtArgs>
   }
   export type OrderItemIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    order?: boolean | OrderDefaultArgs<ExtArgs>
-    product?: boolean | ProductDefaultArgs<ExtArgs>
-  }
-  export type OrderItemIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     order?: boolean | OrderDefaultArgs<ExtArgs>
     product?: boolean | ProductDefaultArgs<ExtArgs>
   }
@@ -13752,36 +12896,6 @@ export namespace Prisma {
      * 
      */
     updateMany<T extends OrderItemUpdateManyArgs>(args: SelectSubset<T, OrderItemUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
-
-    /**
-     * Update zero or more OrderItems and returns the data updated in the database.
-     * @param {OrderItemUpdateManyAndReturnArgs} args - Arguments to update many OrderItems.
-     * @example
-     * // Update many OrderItems
-     * const orderItem = await prisma.orderItem.updateManyAndReturn({
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * 
-     * // Update zero or more OrderItems and only return the `id`
-     * const orderItemWithIdOnly = await prisma.orderItem.updateManyAndReturn({
-     *   select: { id: true },
-     *   where: {
-     *     // ... provide filter here
-     *   },
-     *   data: [
-     *     // ... provide data here
-     *   ]
-     * })
-     * Note, that providing `undefined` is treated as the value not being there.
-     * Read more here: https://pris.ly/d/null-undefined
-     * 
-     */
-    updateManyAndReturn<T extends OrderItemUpdateManyAndReturnArgs>(args: SelectSubset<T, OrderItemUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$OrderItemPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
 
     /**
      * Create or update one OrderItem.
@@ -14271,40 +13385,6 @@ export namespace Prisma {
      * Filter which OrderItems to update
      */
     where?: OrderItemWhereInput
-    /**
-     * Limit how many OrderItems to update.
-     */
-    limit?: number
-  }
-
-  /**
-   * OrderItem updateManyAndReturn
-   */
-  export type OrderItemUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the OrderItem
-     */
-    select?: OrderItemSelectUpdateManyAndReturn<ExtArgs> | null
-    /**
-     * Omit specific fields from the OrderItem
-     */
-    omit?: OrderItemOmit<ExtArgs> | null
-    /**
-     * The data used to update OrderItems.
-     */
-    data: XOR<OrderItemUpdateManyMutationInput, OrderItemUncheckedUpdateManyInput>
-    /**
-     * Filter which OrderItems to update
-     */
-    where?: OrderItemWhereInput
-    /**
-     * Limit how many OrderItems to update.
-     */
-    limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: OrderItemIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -14367,10 +13447,6 @@ export namespace Prisma {
      * Filter which OrderItems to delete
      */
     where?: OrderItemWhereInput
-    /**
-     * Limit how many OrderItems to delete.
-     */
-    limit?: number
   }
 
   /**
@@ -14756,13 +13832,6 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'QueryMode'
-   */
-  export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
-    
-
-
-  /**
    * Reference to a field of type 'TipoEndereco'
    */
   export type EnumTipoEnderecoFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TipoEndereco'>
@@ -14850,7 +13919,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     tenantId?: StringFilter<"User"> | string
-    tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
+    tenant?: XOR<TenantRelationFilter, TenantWhereInput>
     orders?: OrderListRelationFilter
   }
 
@@ -14881,7 +13950,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
     tenantId?: StringFilter<"User"> | string
-    tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
+    tenant?: XOR<TenantRelationFilter, TenantWhereInput>
     orders?: OrderListRelationFilter
   }, "id" | "email">
 
@@ -14927,7 +13996,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Product"> | Date | string
     updatedAt?: DateTimeFilter<"Product"> | Date | string
     tenantId?: StringFilter<"Product"> | string
-    tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
+    tenant?: XOR<TenantRelationFilter, TenantWhereInput>
     orderItems?: OrderItemListRelationFilter
   }
 
@@ -14956,7 +14025,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"Product"> | Date | string
     updatedAt?: DateTimeFilter<"Product"> | Date | string
     tenantId?: StringFilter<"Product"> | string
-    tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
+    tenant?: XOR<TenantRelationFilter, TenantWhereInput>
     orderItems?: OrderItemListRelationFilter
   }, "id" | "sku">
 
@@ -15058,7 +14127,7 @@ export namespace Prisma {
     ultimaConsultaCnpj?: DateTimeNullableFilter<"Cliente"> | Date | string | null
     ultimaConsultaCep?: DateTimeNullableFilter<"Cliente"> | Date | string | null
     tenantId?: StringFilter<"Cliente"> | string
-    tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
+    tenant?: XOR<TenantRelationFilter, TenantWhereInput>
     enderecos?: EnderecoClienteListRelationFilter
     contatos?: ContatoClienteListRelationFilter
     veiculos?: VeiculoClienteListRelationFilter
@@ -15207,7 +14276,7 @@ export namespace Prisma {
     ultimaConsultaCnpj?: DateTimeNullableFilter<"Cliente"> | Date | string | null
     ultimaConsultaCep?: DateTimeNullableFilter<"Cliente"> | Date | string | null
     tenantId?: StringFilter<"Cliente"> | string
-    tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
+    tenant?: XOR<TenantRelationFilter, TenantWhereInput>
     enderecos?: EnderecoClienteListRelationFilter
     contatos?: ContatoClienteListRelationFilter
     veiculos?: VeiculoClienteListRelationFilter
@@ -15377,7 +14446,7 @@ export namespace Prisma {
     isAtivo?: BoolFilter<"EnderecoCliente"> | boolean
     criadoEm?: DateTimeFilter<"EnderecoCliente"> | Date | string
     atualizadoEm?: DateTimeFilter<"EnderecoCliente"> | Date | string
-    cliente?: XOR<ClienteScalarRelationFilter, ClienteWhereInput>
+    cliente?: XOR<ClienteRelationFilter, ClienteWhereInput>
   }
 
   export type EnderecoClienteOrderByWithRelationInput = {
@@ -15420,7 +14489,7 @@ export namespace Prisma {
     isAtivo?: BoolFilter<"EnderecoCliente"> | boolean
     criadoEm?: DateTimeFilter<"EnderecoCliente"> | Date | string
     atualizadoEm?: DateTimeFilter<"EnderecoCliente"> | Date | string
-    cliente?: XOR<ClienteScalarRelationFilter, ClienteWhereInput>
+    cliente?: XOR<ClienteRelationFilter, ClienteWhereInput>
   }, "id">
 
   export type EnderecoClienteOrderByWithAggregationInput = {
@@ -15483,7 +14552,7 @@ export namespace Prisma {
     isAtivo?: BoolFilter<"ContatoCliente"> | boolean
     criadoEm?: DateTimeFilter<"ContatoCliente"> | Date | string
     atualizadoEm?: DateTimeFilter<"ContatoCliente"> | Date | string
-    cliente?: XOR<ClienteScalarRelationFilter, ClienteWhereInput>
+    cliente?: XOR<ClienteRelationFilter, ClienteWhereInput>
   }
 
   export type ContatoClienteOrderByWithRelationInput = {
@@ -15518,7 +14587,7 @@ export namespace Prisma {
     isAtivo?: BoolFilter<"ContatoCliente"> | boolean
     criadoEm?: DateTimeFilter<"ContatoCliente"> | Date | string
     atualizadoEm?: DateTimeFilter<"ContatoCliente"> | Date | string
-    cliente?: XOR<ClienteScalarRelationFilter, ClienteWhereInput>
+    cliente?: XOR<ClienteRelationFilter, ClienteWhereInput>
   }, "id">
 
   export type ContatoClienteOrderByWithAggregationInput = {
@@ -15574,7 +14643,7 @@ export namespace Prisma {
     isAtivo?: BoolFilter<"VeiculoCliente"> | boolean
     criadoEm?: DateTimeFilter<"VeiculoCliente"> | Date | string
     atualizadoEm?: DateTimeFilter<"VeiculoCliente"> | Date | string
-    cliente?: XOR<ClienteScalarRelationFilter, ClienteWhereInput>
+    cliente?: XOR<ClienteRelationFilter, ClienteWhereInput>
   }
 
   export type VeiculoClienteOrderByWithRelationInput = {
@@ -15611,7 +14680,7 @@ export namespace Prisma {
     isAtivo?: BoolFilter<"VeiculoCliente"> | boolean
     criadoEm?: DateTimeFilter<"VeiculoCliente"> | Date | string
     atualizadoEm?: DateTimeFilter<"VeiculoCliente"> | Date | string
-    cliente?: XOR<ClienteScalarRelationFilter, ClienteWhereInput>
+    cliente?: XOR<ClienteRelationFilter, ClienteWhereInput>
   }, "id">
 
   export type VeiculoClienteOrderByWithAggregationInput = {
@@ -15666,7 +14735,7 @@ export namespace Prisma {
     observacoes?: StringNullableFilter<"HistoricoCliente"> | string | null
     criadoEm?: DateTimeFilter<"HistoricoCliente"> | Date | string
     criadoPor?: StringNullableFilter<"HistoricoCliente"> | string | null
-    cliente?: XOR<ClienteScalarRelationFilter, ClienteWhereInput>
+    cliente?: XOR<ClienteRelationFilter, ClienteWhereInput>
   }
 
   export type HistoricoClienteOrderByWithRelationInput = {
@@ -15693,7 +14762,7 @@ export namespace Prisma {
     observacoes?: StringNullableFilter<"HistoricoCliente"> | string | null
     criadoEm?: DateTimeFilter<"HistoricoCliente"> | Date | string
     criadoPor?: StringNullableFilter<"HistoricoCliente"> | string | null
-    cliente?: XOR<ClienteScalarRelationFilter, ClienteWhereInput>
+    cliente?: XOR<ClienteRelationFilter, ClienteWhereInput>
   }, "id">
 
   export type HistoricoClienteOrderByWithAggregationInput = {
@@ -15739,9 +14808,9 @@ export namespace Prisma {
     tenantId?: StringFilter<"Order"> | string
     customerId?: StringFilter<"Order"> | string
     userId?: StringFilter<"Order"> | string
-    tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
-    customer?: XOR<ClienteScalarRelationFilter, ClienteWhereInput>
-    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    tenant?: XOR<TenantRelationFilter, TenantWhereInput>
+    customer?: XOR<ClienteRelationFilter, ClienteWhereInput>
+    user?: XOR<UserRelationFilter, UserWhereInput>
     items?: OrderItemListRelationFilter
   }
 
@@ -15774,9 +14843,9 @@ export namespace Prisma {
     tenantId?: StringFilter<"Order"> | string
     customerId?: StringFilter<"Order"> | string
     userId?: StringFilter<"Order"> | string
-    tenant?: XOR<TenantScalarRelationFilter, TenantWhereInput>
-    customer?: XOR<ClienteScalarRelationFilter, ClienteWhereInput>
-    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    tenant?: XOR<TenantRelationFilter, TenantWhereInput>
+    customer?: XOR<ClienteRelationFilter, ClienteWhereInput>
+    user?: XOR<UserRelationFilter, UserWhereInput>
     items?: OrderItemListRelationFilter
   }, "id">
 
@@ -15821,8 +14890,8 @@ export namespace Prisma {
     unitPrice?: DecimalFilter<"OrderItem"> | Decimal | DecimalJsLike | number | string
     orderId?: StringFilter<"OrderItem"> | string
     productId?: StringFilter<"OrderItem"> | string
-    order?: XOR<OrderScalarRelationFilter, OrderWhereInput>
-    product?: XOR<ProductScalarRelationFilter, ProductWhereInput>
+    order?: XOR<OrderRelationFilter, OrderWhereInput>
+    product?: XOR<ProductRelationFilter, ProductWhereInput>
   }
 
   export type OrderItemOrderByWithRelationInput = {
@@ -15845,8 +14914,8 @@ export namespace Prisma {
     unitPrice?: DecimalFilter<"OrderItem"> | Decimal | DecimalJsLike | number | string
     orderId?: StringFilter<"OrderItem"> | string
     productId?: StringFilter<"OrderItem"> | string
-    order?: XOR<OrderScalarRelationFilter, OrderWhereInput>
-    product?: XOR<ProductScalarRelationFilter, ProductWhereInput>
+    order?: XOR<OrderRelationFilter, OrderWhereInput>
+    product?: XOR<ProductRelationFilter, ProductWhereInput>
   }, "id" | "orderId_productId">
 
   export type OrderItemOrderByWithAggregationInput = {
@@ -17257,7 +16326,7 @@ export namespace Prisma {
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
   }
 
-  export type TenantScalarRelationFilter = {
+  export type TenantRelationFilter = {
     is?: TenantWhereInput
     isNot?: TenantWhereInput
   }
@@ -17499,13 +16568,12 @@ export namespace Prisma {
   export type JsonNullableFilterBase<$PrismaModel = never> = {
     equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
     path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
     string_contains?: string | StringFieldRefInput<$PrismaModel>
     string_starts_with?: string | StringFieldRefInput<$PrismaModel>
     string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
@@ -17847,13 +16915,12 @@ export namespace Prisma {
   export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
     equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
     path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
     string_contains?: string | StringFieldRefInput<$PrismaModel>
     string_starts_with?: string | StringFieldRefInput<$PrismaModel>
     string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
@@ -17871,7 +16938,7 @@ export namespace Prisma {
     not?: NestedEnumTipoEnderecoFilter<$PrismaModel> | $Enums.TipoEndereco
   }
 
-  export type ClienteScalarRelationFilter = {
+  export type ClienteRelationFilter = {
     is?: ClienteWhereInput
     isNot?: ClienteWhereInput
   }
@@ -18089,7 +17156,7 @@ export namespace Prisma {
     valor?: SortOrder
   }
 
-  export type UserScalarRelationFilter = {
+  export type UserRelationFilter = {
     is?: UserWhereInput
     isNot?: UserWhereInput
   }
@@ -18138,12 +17205,12 @@ export namespace Prisma {
     totalAmount?: SortOrder
   }
 
-  export type OrderScalarRelationFilter = {
+  export type OrderRelationFilter = {
     is?: OrderWhereInput
     isNot?: OrderWhereInput
   }
 
-  export type ProductScalarRelationFilter = {
+  export type ProductRelationFilter = {
     is?: ProductWhereInput
     isNot?: ProductWhereInput
   }
@@ -19257,13 +18324,12 @@ export namespace Prisma {
   export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
     equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
     path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
     string_contains?: string | StringFieldRefInput<$PrismaModel>
     string_starts_with?: string | StringFieldRefInput<$PrismaModel>
     string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
     lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
     gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
