@@ -1,11 +1,14 @@
 // =============================================================================
-// SmartPeças ERP - AuthController (AdminUser) - VERSÃO CORRIGIDA
+// SmartPeças ERP - AuthController (Versão Final Otimizada e Segura v1.2.3)
 // =============================================================================
 // Arquivo: backend/src/auth/auth.controller.ts
 //
 // Descrição: Controlador para autenticação de administradores globais.
+// Utiliza Guard, DTOs e injeta IP/User-Agent para auditoria.
 //
-// Versão: 1.1
+// Versão: 1.2.3
+// Equipe SmartPeças
+// Atualizado em: 08/07/2025
 // =============================================================================
 
 import {
@@ -13,59 +16,73 @@ import {
   Post,
   HttpCode,
   HttpStatus,
-  UseGuards,
   Res,
   Logger,
-  UnauthorizedException,
-  // ✅ CORREÇÃO: Renomeamos o decorador para evitar conflito
-  Request as NestRequest, 
+  Req,
+  Body,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { LoginAdminDto } from './dto/login-admin.dto';
-// ✅ CORREÇÃO: Importamos os tipos necessários
 import { Request, Response } from 'express';
-import { AuthGuard } from '@nestjs/passport';
-import { AdminUser } from '@/public-client';
+import { LoginRateLimiterService } from './login-rate-limiter.service';
 
-@ApiTags('Auth - Admin Global')
+@ApiTags('Autenticação')
 @Controller('auth')
 export class AuthController {
   private readonly logger = new Logger(AuthController.name);
 
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private loginRateLimiterService: LoginRateLimiterService,
+  ) {}
 
-  // ✅ CORREÇÃO: Usamos o guard 'local-admin' que corresponde à sua LocalAdminStrategy
-  @UseGuards(AuthGuard('local-admin'))
   @Post('login/admin')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Login de administrador global do sistema' })
-  @ApiBody({ type: LoginAdminDto }) // O Body da requisição espera este DTO
-  @ApiResponse({ status: 200, description: 'Login bem-sucedido. Retorna token JWT.'})
-  @ApiResponse({ status: 401, description: 'Credenciais inválidas.' })
-  async loginAdmin(
-    // ✅ CORREÇÃO: Usamos o decorador renomeado 'NestRequest' e o tipo 'Request' do Express
-    @NestRequest() req: Request, 
-    @Res({ passthrough: true }) res: Response
-  ) {
-    // ✅ CORREÇÃO: Fazemos a asserção de tipo e a verificação de segurança
-    const user = req.user as Omit<AdminUser, 'password'>;
-    if (!user) {
-      throw new UnauthorizedException('Falha no processo de autenticação do guard.');
+  @ApiOperation({ summary: 'Login de administrador global e retorno de token JWT.' })
+  @ApiBody({ type: LoginAdminDto, description: 'Credenciais de login do administrador.' })
+  @ApiResponse({ status: 200, description: 'Login bem-sucedido. Retorna o token JWT e metadados.', schema: {
+    example: {
+      access_token: 'eyJhbGciOiJIUzI1Ni...',
+      expires_in: 3600,
+      token_type: 'Bearer',
+      user: { id: 'uuid', email: 'admin@example.com', name: 'Admin Name' }
     }
+  }})
+  @ApiResponse({ status: 401, description: 'Credenciais inválidas.' })
+  @ApiResponse({ status: 403, description: 'Acesso à conta suspenso.' })
+  @ApiResponse({ status: 429, description: 'Muitas tentativas de login. Conta temporariamente bloqueada.' })
+  async loginAdmin(
+    @Body() loginAdminDto: LoginAdminDto,
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response
+  ): Promise<{ access_token: string; expires_in: number; token_type: string; user: { id: string; email: string; name: string | null } }> { // CORREÇÃO: Tipo de retorno completo
+    const userIp = req.ip || req.connection?.remoteAddress || 'unknown'; 
+    const userAgent = req.headers['user-agent'] || 'unknown'; // CORREÇÃO: UserAgent agora é usado
 
-    this.logger.log(`Login bem-sucedido para administrador: ${user.email}`);
+    this.logger.log(`Tentativa de login para admin: ${loginAdminDto.email} do IP: ${userIp}`);
 
-    // A lógica de chamada ao serviço e retorno do token está perfeita.
-    const result = await this.authService.loginAdmin(user);
+    await this.loginRateLimiterService.checkAttempts(loginAdminDto.email, userIp);
 
-    // Opcional: Definir o token como um cookie
-    res.cookie('jwt_admin', result.access_token, {
+    const authResult = await this.authService.validateAndLoginAdmin(
+      loginAdminDto.email,
+      loginAdminDto.password,
+      userIp,
+      userAgent // NOVO: Passa userAgent para o AuthService
+    );
+
+    res.cookie('jwt_admin', authResult.access_token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
+      maxAge: authResult.expires_in * 1000 // Usa expiresIn do resultado (já em segundos) para maxAge do cookie (em ms)
     });
 
-    return result;
+    return {
+      access_token: authResult.access_token,
+      expires_in: authResult.expires_in,
+      token_type: 'Bearer',
+      user: authResult.user, // Agora o objeto 'user' completo vem do serviço
+    };
   }
 }

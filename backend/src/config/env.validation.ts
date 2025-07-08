@@ -1,5 +1,5 @@
 // =============================================================================
-// SmartPeças ERP - Validação das Variáveis de Ambiente (VERSÃO REFINADA)
+// SmartPeças ERP - Validação das Variáveis de Ambiente
 // =============================================================================
 // Arquivo: backend/src/config/env.validation.ts
 //
