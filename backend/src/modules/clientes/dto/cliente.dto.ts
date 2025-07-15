@@ -6,9 +6,9 @@
 // Descrição: Define os DTOs de requisição (Create/Update/Consultar) e a
 // interface de entrada para queries no Prisma (BuscarClientesParams).
 //
-// Versão: 1.3.3
+// Versão: 1.3.4
 // Equipe SmartPeças
-// Atualizado em: 07/07/2025
+// Atualizado em: 09/07/2025
 // =============================================================================
 
 import {
@@ -30,7 +30,6 @@ import {
   PartialType,
 } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-// CORRECTION: Corrected import path for the unified Prisma Client
 import { TipoCliente } from '../../../generated/prisma-client';
 import { IsDocumentoValido } from '../validacoes/decorators/is-documento-valido.decorator';
 
@@ -96,9 +95,15 @@ export class CreateClienteDto {
   criadoPorIp?: string;
 }
 
-// =============================================================================
-// CONSULTAR (GET /clientes)
-// =============================================================================
+// ========== DTO DE ATUALIZAÇÃO ==========
+export class UpdateClienteDto extends PartialType(CreateClienteDto) {
+  @ApiProperty({ description: 'ID do cliente a ser atualizado' })
+  @IsString()
+  @IsNotEmpty()
+  id: string; // O ID é requerido no DTO para requisições PUT, mesmo se for em param.
+}
+
+// ========== DTO DE CONSULTA COM PAGINAÇÃO ==========
 export class ConsultarClienteDto {
   @ApiPropertyOptional({ description: 'Busca por nome ou razão social (parcial)' })
   @IsString()
@@ -153,23 +158,7 @@ export class ConsultarClienteDto {
   sortOrder?: 'ASC' | 'DESC' = 'ASC';
 }
 
-// =====================================================================================
-// UPDATE
-// =====================================================================================
-// Estamos usando PartialType para o UpdateClienteDto a partir de um tipo específico
-// (e não da classe CreateClienteDto diretamente) porque CreateClienteDto pode conter
-// decoradores que não são desejados para atualizações parciais.
-//=======================================================================================
-export class UpdateClienteDto extends PartialType(CreateClienteDto) {
-  @ApiProperty({ description: 'ID do cliente a ser atualizado' })
-  @IsString()
-  @IsNotEmpty()
-  id: string; // O ID é requerido no DTO para requisições PUT, mesmo se for em param.
-}
-
-// =============================================================================
-// INTERFACE PARA BUSCA COM PRISMA
-// =============================================================================
+// ========== INTERFACE PARA BUSCA COM PRISMA ==========
 export interface BuscarClientesParams {
   nome?: string;
   documento?: string;
@@ -182,9 +171,7 @@ export interface BuscarClientesParams {
   sortOrder?: 'ASC' | 'DESC';
 }
 
-// ========================================= 
-// DTO DE RESPOSTA 
-// =========================================
+// ========== DTOs DE RESPOSTA ==========
 export interface EnderecoResponseDto {
   id: string;
   cep: string;
@@ -227,4 +214,33 @@ export interface ClienteResponseDto {
   atualizadoPor: string | null;
   enderecos?: EnderecoResponseDto[];
   contatos?: ContatoResponseDto[];
+}
+
+// ========== OUTROS DTOs DE INTEGRAÇÃO (AGORA INCLUÍDOS AQUI) ==========
+export class ConsultarCnpjDto { // INCLUÍDO E EXPORTADO AQUI
+  @ApiProperty({ description: 'CNPJ para consulta', example: '00000000000100' })
+  @IsString()
+  @IsNotEmpty()
+  @Matches(/^[0-9]+$/, { message: 'O CNPJ deve conter apenas números.' })
+  @Length(14, 14, { message: 'O CNPJ deve ter 14 dígitos.' })
+  cnpj: string;
+}
+
+export class ConsultarCepDto { // INCLUÍDO E EXPORTADO AQUI
+  @ApiProperty({ description: 'CEP para consulta', example: '01001000' })
+  @IsString()
+  @IsNotEmpty()
+  @Matches(/^[0-9]{8}$/, { message: 'O CEP deve conter 8 dígitos numéricos.' })
+  cep: string;
+}
+
+export interface EstatisticasResumoDto { // INCLUÍDO E EXPORTADO AQUI
+  totalClientes: number;
+  clientesAtivos: number;
+  clientesInativos: number;
+  clientesInadimplentes: number;
+  clientesPessoaFisica: number;
+  clientesPessoaJuridica: number;
+  clientesUltimos30Dias: number;
+  percentualInadimplencia: number;
 }

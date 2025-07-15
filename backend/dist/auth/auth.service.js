@@ -48,50 +48,97 @@ const common_1 = require("@nestjs/common");
 const jwt_1 = require("@nestjs/jwt");
 const prisma_service_1 = require("../prisma/prisma.service");
 const bcrypt = __importStar(require("bcrypt"));
+const prisma_client_1 = require("../generated/prisma-client");
+const login_rate_limiter_service_1 = require("./login-rate-limiter.service");
 let AuthService = AuthService_1 = class AuthService {
-    constructor(prisma, jwtService) {
+    constructor(prisma, jwtService, loginRateLimiterService) {
         this.prisma = prisma;
         this.jwtService = jwtService;
+        this.loginRateLimiterService = loginRateLimiterService;
         this.logger = new common_1.Logger(AuthService_1.name);
     }
-    async validateAdminUser(email, password_plain) {
-        this.logger.debug(`Validando adminUser: ${email}`);
+    async validateCredentials(email, password_plain) {
         const adminUser = await this.prisma.adminUser.findUnique({
             where: { email },
-            include: { tenant: true },
+            select: {
+                id: true,
+                email: true,
+                password: true,
+                name: true,
+                role: true,
+                isActive: true,
+                tenantId: true,
+                createdAt: true,
+                updatedAt: true,
+                tenant: {
+                    select: {
+                        id: true,
+                        billingStatus: true,
+                        isActive: true,
+                    },
+                },
+            },
         });
         if (!adminUser || !adminUser.isActive) {
-            this.logger.warn(`Login de admin falhou para '${email}': usuário não encontrado ou inativo.`);
-            throw new common_1.UnauthorizedException('Credenciais inválidas.');
-        }
-        if (!adminUser.tenant || adminUser.tenant.billingStatus !== 'ACTIVE') {
-            this.logger.warn(`Login de admin bloqueado para '${email}': tenant inadimplente.`);
-            throw new common_1.ForbiddenException('O acesso à conta está suspenso.');
+            return null;
         }
         const isPasswordValid = await bcrypt.compare(password_plain, adminUser.password);
         if (!isPasswordValid) {
-            this.logger.warn(`Login de admin falhou para '${email}': senha inválida.`);
-            throw new common_1.UnauthorizedException('Credenciais inválidas.');
+            return null;
         }
         const { password, ...safeUser } = adminUser;
         return safeUser;
     }
-    async loginAdmin(adminUser) {
-        this.logger.debug(`Gerando JWT para adminUser: ${adminUser.email}`);
+    async validateAndLoginAdmin(email, password_plain, ip) {
+        this.logger.debug(`Tentativa de login para adminUser: ${email} do IP: ${ip}`);
+        await this.loginRateLimiterService.checkAttempts(email, ip);
+        const adminUserValidated = await this.validateCredentials(email, password_plain);
+        if (!adminUserValidated) {
+            this.logger.warn(`Login de admin falhou para '${email}': credenciais inválidas.`);
+            await this.loginRateLimiterService.recordFailedAttempt(email, ip);
+            throw new common_1.UnauthorizedException('Credenciais inválidas.');
+        }
+        await this.verificarStatusTenant(adminUserValidated.tenant);
+        const userRoleEnum = adminUserValidated.role;
+        if (!Object.values(prisma_client_1.Role).includes(userRoleEnum)) {
+            this.logger.error(`[SEGURANÇA] Perfil de acesso inválido no DB para '${email}': ${adminUserValidated.role}`);
+            throw new common_1.InternalServerErrorException('Configuração de perfil de usuário inválida. Contate o suporte.');
+        }
+        await this.loginRateLimiterService.resetAttempts(email, ip);
         const payload = {
-            sub: adminUser.id,
-            email: adminUser.email,
-            role: adminUser.role,
-            tenantId: adminUser.tenantId,
+            sub: adminUserValidated.id,
+            email: adminUserValidated.email,
+            role: userRoleEnum,
+            tenantId: adminUserValidated.tenantId ?? null,
+            name: adminUserValidated.name ?? null,
+            ip: ip ?? null,
         };
         const token = this.jwtService.sign(payload);
-        return { access_token: token };
+        const decodedToken = this.jwtService.decode(token);
+        const expiresIn = decodedToken.exp ? decodedToken.exp - Math.floor(Date.now() / 1000) : 3600;
+        this.logger.debug(`Gerando JWT para adminUser: ${adminUserValidated.email}`);
+        return {
+            access_token: token,
+            expires_in: expiresIn,
+            user: {
+                id: adminUserValidated.id,
+                email: adminUserValidated.email,
+                name: adminUserValidated.name,
+            },
+        };
+    }
+    async verificarStatusTenant(tenant) {
+        if (!tenant || tenant.billingStatus !== 'ACTIVE' || !tenant.isActive) {
+            this.logger.warn(`Acesso bloqueado: Tenant com status de faturamento ${tenant?.billingStatus || 'NÃO ENCONTRADO'}.`);
+            throw new common_1.ForbiddenException('O acesso à conta está suspenso. Entre em contato com o suporte.');
+        }
     }
 };
 exports.AuthService = AuthService;
 exports.AuthService = AuthService = AuthService_1 = __decorate([
     (0, common_1.Injectable)(),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
-        jwt_1.JwtService])
+        jwt_1.JwtService,
+        login_rate_limiter_service_1.LoginRateLimiterService])
 ], AuthService);
 //# sourceMappingURL=auth.service.js.map

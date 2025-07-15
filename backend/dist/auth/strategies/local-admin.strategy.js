@@ -17,18 +17,21 @@ const common_1 = require("@nestjs/common");
 const auth_service_1 = require("../auth.service");
 let LocalAdminStrategy = LocalAdminStrategy_1 = class LocalAdminStrategy extends (0, passport_1.PassportStrategy)(passport_local_1.Strategy, 'local-admin') {
     constructor(authService) {
-        super({ usernameField: 'email', passwordField: 'password' });
+        super({
+            usernameField: 'email',
+            passwordField: 'password',
+        });
         this.authService = authService;
         this.logger = new common_1.Logger(LocalAdminStrategy_1.name);
     }
-    async validate(email, password) {
-        this.logger.debug(`Executando validação local para admin: ${email}`);
-        const adminUser = await this.authService.validateAdminUser(email, password);
-        if (!adminUser) {
-            this.logger.warn(`AdminUser inválido ou tenant não autorizado: ${email}`);
-            throw new common_1.UnauthorizedException('Credenciais inválidas ou acesso suspenso.');
+    async validate(email, password_plain) {
+        this.logger.debug(`Tentativa de validação local para: ${email}`);
+        const user = await this.authService.validateCredentials(email, password_plain);
+        if (!user) {
+            this.logger.warn(`Credenciais inválidas para ${email}.`);
+            throw new common_1.UnauthorizedException('Credenciais inválidas.');
         }
-        return adminUser;
+        return user;
     }
 };
 exports.LocalAdminStrategy = LocalAdminStrategy;

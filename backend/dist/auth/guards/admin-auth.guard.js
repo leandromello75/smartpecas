@@ -10,6 +10,12 @@ exports.AdminAuthGuard = void 0;
 const common_1 = require("@nestjs/common");
 const passport_1 = require("@nestjs/passport");
 let AdminAuthGuard = class AdminAuthGuard extends (0, passport_1.AuthGuard)('jwt-admin') {
+    handleRequest(err, user) {
+        if (err || !user) {
+            throw err || new common_1.UnauthorizedException('Autenticação JWT de administrador falhou.');
+        }
+        return user;
+    }
 };
 exports.AdminAuthGuard = AdminAuthGuard;
 exports.AdminAuthGuard = AdminAuthGuard = __decorate([

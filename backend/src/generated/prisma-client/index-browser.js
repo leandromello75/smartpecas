@@ -368,6 +368,12 @@ exports.Prisma.JsonNullValueFilter = {
   JsonNull: Prisma.JsonNull,
   AnyNull: Prisma.AnyNull
 };
+exports.BillingStatus = exports.$Enums.BillingStatus = {
+  ACTIVE: 'ACTIVE',
+  PAST_DUE: 'PAST_DUE',
+  SUSPENDED: 'SUSPENDED'
+};
+
 exports.Role = exports.$Enums.Role = {
   USER: 'USER',
   ADMIN: 'ADMIN',

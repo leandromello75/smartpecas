@@ -74,20 +74,27 @@ enum NivelConfidencialidade {
   CONFIDENCIAL
 }
 
+enum BillingStatus {
+  ACTIVE    @map("ACTIVE")
+  PAST_DUE  @map("PAST_DUE")
+  SUSPENDED @map("SUSPENDED")
+  // Adicione outros status se houver (e.g., TRIAL, CANCELLED)
+}
+
 // =============================================================================
 // MODELOS (TODOS AQUI, UMA ÚNICA VEZ, COM SUAS RELAÇÕES COMPLETAS)
 // =============================================================================
 
 // == Modelos Globais ==
 model Tenant {
-  id            String   @id @default(uuid())
+  id            String        @id @default(uuid())
   name          String
-  schemaUrl     String   @unique @map("schema_url")
-  cnpj          String?  @unique
-  isActive      Boolean  @default(true)
-  billingStatus String   @default("ACTIVE")
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  schemaUrl     String        @unique @map("schema_url")
+  cnpj          String?       @unique
+  isActive      Boolean       @default(true)
+  billingStatus BillingStatus @default(ACTIVE)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
 
   adminUsers AdminUser[] // Relação com AdminUser
 
@@ -419,4 +426,15 @@ model AuditoriaLog {
   @@index([realizadoPor])
   @@index([realizadoEm])
   @@map("auditoria_log")
+}
+
+// =============================================================================
+// MODELO: OrderStatus
+// =============================================================================
+enum OrderStatus {
+  PENDING    @map("pending")
+  PROCESSING @map("processing")
+  COMPLETED  @map("completed")
+  CANCELLED  @map("cancelled")
+  // Adicione outros status conforme necessário para suas ordens
 }

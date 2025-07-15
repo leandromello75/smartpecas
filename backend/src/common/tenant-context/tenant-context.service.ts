@@ -1,39 +1,65 @@
 // =============================================================================
-// SmartPeças ERP - TenantContextService (VERSÃO FINAL REATORADA)
+// SmartPeças ERP - TenantContextService (VERSÃO FINAL COMPLETA E CORRIGIDA)
 // =============================================================================
 // Arquivo: backend/src/common/tenant-context/tenant-context.service.ts
-// Versão: 2.0
+//
+// Descrição: Serviço para gerenciar o contexto do tenant (ID, nome, status)
+// para a requisição atual, usando AsyncLocalStorage.
+//
+// Versão: 2.0.3
+// Equipe SmartPeças + Refatoração IA
+// Atualizado em: 10/07/2025 - 10:48 PM BRT
 // =============================================================================
 
-import { Injectable, Logger, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { AsyncLocalStorage } from 'async_hooks';
+import { BillingStatus } from '../../generated/prisma-client'; // Importar BillingStatus
 
-// ✅ A interface agora é a nossa fonte da verdade, usando 'schemaUrl'.
+// INTERFACE TENANTCONTEXT COMPLETA E CORRIGIDA
 export interface TenantContext {
   id: string;
-  schemaUrl: string; // PADRÃO ADOTADO
   name: string;
-  cnpj: string | null;
+  billingStatus: BillingStatus;
   isActive: boolean;
-  billingStatus: 'ACTIVE' | 'PAST_DUE' | 'SUSPENDED';
+  schemaUrl: string;
+  cnpj: string | null;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 @Injectable()
 export class TenantContextService {
   private readonly logger = new Logger(TenantContextService.name);
+  // CORREÇÃO: Declaração da propriedade explicitamente no corpo da classe
+  // Isso garante que ela seja reconhecida como uma propriedade da instância
   private readonly asyncLocalStorage = new AsyncLocalStorage<TenantContext>();
 
-  // Substituímos 'setTenant' pelo método 'run', que é mais seguro.
-  run<R>(context: TenantContext, fn: () => R): R {
-    this.logger.debug(`Iniciando contexto para Tenant ID: ${context.id} (${context.schemaUrl})`);
-    return this.asyncLocalStorage.run(context, fn);
+  constructor() {
+    // A propriedade já está inicializada acima, então o construtor pode ficar vazio
+    // Ou você pode inicializá-la aqui: this.asyncLocalStorage = new AsyncLocalStorage<TenantContext>();
   }
 
+  /**
+   * Executa uma função com um contexto de tenant definido.
+   * @param context Objeto TenantContext a ser armazenado.
+   * @param callback Função a ser executada com o contexto definido.
+   * @returns O resultado da função callback.
+   */
+  run<R>(context: TenantContext, fn: () => R): R {
+    this.logger.debug(`[TenantContextService] Definindo contexto para tenant: ${context.id} (SchemaURL: ${context.schemaUrl})`);
+    return this.asyncLocalStorage.run(context, fn); // Acessando a propriedade corretamente
+  }
+
+  /**
+   * Retorna o contexto do tenant da requisição atual.
+   * @returns TenantContext
+   * @throws InternalServerErrorException se o contexto não estiver definido.
+   */
   getTenantContext(): TenantContext {
-    const store = this.asyncLocalStorage.getStore();
+    const store = this.asyncLocalStorage.getStore(); // Acessando a propriedade corretamente
     if (!store) {
-      this.logger.error('Contexto do inquilino não foi definido para esta requisição.');
-      throw new InternalServerErrorException('Contexto do inquilino não definido.');
+      this.logger.error('[TenantContextService] Contexto do inquilino não encontrado na AsyncLocalStorage. Isso pode indicar um TenantInterceptor ou Guard ausente/falho.');
+      throw new InternalServerErrorException('Contexto do inquilino não definido para a requisição.');
     }
     return store;
   }
@@ -47,7 +73,19 @@ export class TenantContextService {
     return this.getTenantContext().schemaUrl;
   }
 
-  get billingStatus(): 'ACTIVE' | 'PAST_DUE' | 'SUSPENDED' {
+  get billingStatus(): BillingStatus {
     return this.getTenantContext().billingStatus;
+  }
+
+  get tenantCnpj(): string | null {
+    return this.getTenantContext().cnpj;
+  }
+
+  get tenantCreatedAt(): Date {
+    return this.getTenantContext().createdAt;
+  }
+
+  get tenantUpdatedAt(): Date {
+    return this.getTenantContext().updatedAt;
   }
 }

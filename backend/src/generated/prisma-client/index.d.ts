@@ -145,6 +145,25 @@ export const NivelConfidencialidade: {
 
 export type NivelConfidencialidade = (typeof NivelConfidencialidade)[keyof typeof NivelConfidencialidade]
 
+
+export const BillingStatus: {
+  ACTIVE: 'ACTIVE',
+  PAST_DUE: 'PAST_DUE',
+  SUSPENDED: 'SUSPENDED'
+};
+
+export type BillingStatus = (typeof BillingStatus)[keyof typeof BillingStatus]
+
+
+export const OrderStatus: {
+  PENDING: 'PENDING',
+  PROCESSING: 'PROCESSING',
+  COMPLETED: 'COMPLETED',
+  CANCELLED: 'CANCELLED'
+};
+
+export type OrderStatus = (typeof OrderStatus)[keyof typeof OrderStatus]
+
 }
 
 export type Role = $Enums.Role
@@ -174,6 +193,14 @@ export const FormaPagamentoPadrao: typeof $Enums.FormaPagamentoPadrao
 export type NivelConfidencialidade = $Enums.NivelConfidencialidade
 
 export const NivelConfidencialidade: typeof $Enums.NivelConfidencialidade
+
+export type BillingStatus = $Enums.BillingStatus
+
+export const BillingStatus: typeof $Enums.BillingStatus
+
+export type OrderStatus = $Enums.OrderStatus
+
+export const OrderStatus: typeof $Enums.OrderStatus
 
 /**
  * ##  Prisma Client ʲˢ
@@ -2317,7 +2344,7 @@ export namespace Prisma {
     schemaUrl: string | null
     cnpj: string | null
     isActive: boolean | null
-    billingStatus: string | null
+    billingStatus: $Enums.BillingStatus | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -2328,7 +2355,7 @@ export namespace Prisma {
     schemaUrl: string | null
     cnpj: string | null
     isActive: boolean | null
-    billingStatus: string | null
+    billingStatus: $Enums.BillingStatus | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -2458,7 +2485,7 @@ export namespace Prisma {
     schemaUrl: string
     cnpj: string | null
     isActive: boolean
-    billingStatus: string
+    billingStatus: $Enums.BillingStatus
     createdAt: Date
     updatedAt: Date
     _count: TenantCountAggregateOutputType | null
@@ -2563,7 +2590,7 @@ export namespace Prisma {
       schemaUrl: string
       cnpj: string | null
       isActive: boolean
-      billingStatus: string
+      billingStatus: $Enums.BillingStatus
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["tenant"]>
@@ -3001,7 +3028,7 @@ export namespace Prisma {
     readonly schemaUrl: FieldRef<"Tenant", 'String'>
     readonly cnpj: FieldRef<"Tenant", 'String'>
     readonly isActive: FieldRef<"Tenant", 'Boolean'>
-    readonly billingStatus: FieldRef<"Tenant", 'String'>
+    readonly billingStatus: FieldRef<"Tenant", 'BillingStatus'>
     readonly createdAt: FieldRef<"Tenant", 'DateTime'>
     readonly updatedAt: FieldRef<"Tenant", 'DateTime'>
   }
@@ -18545,6 +18572,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'BillingStatus'
+   */
+  export type EnumBillingStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BillingStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'BillingStatus[]'
+   */
+  export type ListEnumBillingStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BillingStatus[]'>
+    
+
+
+  /**
    * Reference to a field of type 'DateTime'
    */
   export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
@@ -18668,7 +18709,7 @@ export namespace Prisma {
     schemaUrl?: StringFilter<"Tenant"> | string
     cnpj?: StringNullableFilter<"Tenant"> | string | null
     isActive?: BoolFilter<"Tenant"> | boolean
-    billingStatus?: StringFilter<"Tenant"> | string
+    billingStatus?: EnumBillingStatusFilter<"Tenant"> | $Enums.BillingStatus
     createdAt?: DateTimeFilter<"Tenant"> | Date | string
     updatedAt?: DateTimeFilter<"Tenant"> | Date | string
     adminUsers?: AdminUserListRelationFilter
@@ -18707,7 +18748,7 @@ export namespace Prisma {
     NOT?: TenantWhereInput | TenantWhereInput[]
     name?: StringFilter<"Tenant"> | string
     isActive?: BoolFilter<"Tenant"> | boolean
-    billingStatus?: StringFilter<"Tenant"> | string
+    billingStatus?: EnumBillingStatusFilter<"Tenant"> | $Enums.BillingStatus
     createdAt?: DateTimeFilter<"Tenant"> | Date | string
     updatedAt?: DateTimeFilter<"Tenant"> | Date | string
     adminUsers?: AdminUserListRelationFilter
@@ -18742,7 +18783,7 @@ export namespace Prisma {
     schemaUrl?: StringWithAggregatesFilter<"Tenant"> | string
     cnpj?: StringNullableWithAggregatesFilter<"Tenant"> | string | null
     isActive?: BoolWithAggregatesFilter<"Tenant"> | boolean
-    billingStatus?: StringWithAggregatesFilter<"Tenant"> | string
+    billingStatus?: EnumBillingStatusWithAggregatesFilter<"Tenant"> | $Enums.BillingStatus
     createdAt?: DateTimeWithAggregatesFilter<"Tenant"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Tenant"> | Date | string
   }
@@ -20020,7 +20061,7 @@ export namespace Prisma {
     schemaUrl: string
     cnpj?: string | null
     isActive?: boolean
-    billingStatus?: string
+    billingStatus?: $Enums.BillingStatus
     createdAt?: Date | string
     updatedAt?: Date | string
     adminUsers?: AdminUserCreateNestedManyWithoutTenantInput
@@ -20038,7 +20079,7 @@ export namespace Prisma {
     schemaUrl: string
     cnpj?: string | null
     isActive?: boolean
-    billingStatus?: string
+    billingStatus?: $Enums.BillingStatus
     createdAt?: Date | string
     updatedAt?: Date | string
     adminUsers?: AdminUserUncheckedCreateNestedManyWithoutTenantInput
@@ -20056,7 +20097,7 @@ export namespace Prisma {
     schemaUrl?: StringFieldUpdateOperationsInput | string
     cnpj?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
-    billingStatus?: StringFieldUpdateOperationsInput | string
+    billingStatus?: EnumBillingStatusFieldUpdateOperationsInput | $Enums.BillingStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     adminUsers?: AdminUserUpdateManyWithoutTenantNestedInput
@@ -20074,7 +20115,7 @@ export namespace Prisma {
     schemaUrl?: StringFieldUpdateOperationsInput | string
     cnpj?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
-    billingStatus?: StringFieldUpdateOperationsInput | string
+    billingStatus?: EnumBillingStatusFieldUpdateOperationsInput | $Enums.BillingStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     adminUsers?: AdminUserUncheckedUpdateManyWithoutTenantNestedInput
@@ -20092,7 +20133,7 @@ export namespace Prisma {
     schemaUrl: string
     cnpj?: string | null
     isActive?: boolean
-    billingStatus?: string
+    billingStatus?: $Enums.BillingStatus
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -20103,7 +20144,7 @@ export namespace Prisma {
     schemaUrl?: StringFieldUpdateOperationsInput | string
     cnpj?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
-    billingStatus?: StringFieldUpdateOperationsInput | string
+    billingStatus?: EnumBillingStatusFieldUpdateOperationsInput | $Enums.BillingStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -20114,7 +20155,7 @@ export namespace Prisma {
     schemaUrl?: StringFieldUpdateOperationsInput | string
     cnpj?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
-    billingStatus?: StringFieldUpdateOperationsInput | string
+    billingStatus?: EnumBillingStatusFieldUpdateOperationsInput | $Enums.BillingStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -21627,6 +21668,13 @@ export namespace Prisma {
     not?: NestedBoolFilter<$PrismaModel> | boolean
   }
 
+  export type EnumBillingStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.BillingStatus | EnumBillingStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.BillingStatus[] | ListEnumBillingStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.BillingStatus[] | ListEnumBillingStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumBillingStatusFilter<$PrismaModel> | $Enums.BillingStatus
+  }
+
   export type DateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -21788,6 +21836,16 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedBoolFilter<$PrismaModel>
     _max?: NestedBoolFilter<$PrismaModel>
+  }
+
+  export type EnumBillingStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.BillingStatus | EnumBillingStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.BillingStatus[] | ListEnumBillingStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.BillingStatus[] | ListEnumBillingStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumBillingStatusWithAggregatesFilter<$PrismaModel> | $Enums.BillingStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumBillingStatusFilter<$PrismaModel>
+    _max?: NestedEnumBillingStatusFilter<$PrismaModel>
   }
 
   export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
@@ -22965,6 +23023,10 @@ export namespace Prisma {
     set?: boolean
   }
 
+  export type EnumBillingStatusFieldUpdateOperationsInput = {
+    set?: $Enums.BillingStatus
+  }
+
   export type DateTimeFieldUpdateOperationsInput = {
     set?: Date | string
   }
@@ -23828,6 +23890,13 @@ export namespace Prisma {
     not?: NestedBoolFilter<$PrismaModel> | boolean
   }
 
+  export type NestedEnumBillingStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.BillingStatus | EnumBillingStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.BillingStatus[] | ListEnumBillingStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.BillingStatus[] | ListEnumBillingStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumBillingStatusFilter<$PrismaModel> | $Enums.BillingStatus
+  }
+
   export type NestedDateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -23901,6 +23970,16 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedBoolFilter<$PrismaModel>
     _max?: NestedBoolFilter<$PrismaModel>
+  }
+
+  export type NestedEnumBillingStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.BillingStatus | EnumBillingStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.BillingStatus[] | ListEnumBillingStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.BillingStatus[] | ListEnumBillingStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumBillingStatusWithAggregatesFilter<$PrismaModel> | $Enums.BillingStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumBillingStatusFilter<$PrismaModel>
+    _max?: NestedEnumBillingStatusFilter<$PrismaModel>
   }
 
   export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
@@ -24775,7 +24854,7 @@ export namespace Prisma {
     schemaUrl: string
     cnpj?: string | null
     isActive?: boolean
-    billingStatus?: string
+    billingStatus?: $Enums.BillingStatus
     createdAt?: Date | string
     updatedAt?: Date | string
     users?: UserCreateNestedManyWithoutTenantInput
@@ -24792,7 +24871,7 @@ export namespace Prisma {
     schemaUrl: string
     cnpj?: string | null
     isActive?: boolean
-    billingStatus?: string
+    billingStatus?: $Enums.BillingStatus
     createdAt?: Date | string
     updatedAt?: Date | string
     users?: UserUncheckedCreateNestedManyWithoutTenantInput
@@ -24825,7 +24904,7 @@ export namespace Prisma {
     schemaUrl?: StringFieldUpdateOperationsInput | string
     cnpj?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
-    billingStatus?: StringFieldUpdateOperationsInput | string
+    billingStatus?: EnumBillingStatusFieldUpdateOperationsInput | $Enums.BillingStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     users?: UserUpdateManyWithoutTenantNestedInput
@@ -24842,7 +24921,7 @@ export namespace Prisma {
     schemaUrl?: StringFieldUpdateOperationsInput | string
     cnpj?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
-    billingStatus?: StringFieldUpdateOperationsInput | string
+    billingStatus?: EnumBillingStatusFieldUpdateOperationsInput | $Enums.BillingStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     users?: UserUncheckedUpdateManyWithoutTenantNestedInput
@@ -24859,7 +24938,7 @@ export namespace Prisma {
     schemaUrl: string
     cnpj?: string | null
     isActive?: boolean
-    billingStatus?: string
+    billingStatus?: $Enums.BillingStatus
     createdAt?: Date | string
     updatedAt?: Date | string
     adminUsers?: AdminUserCreateNestedManyWithoutTenantInput
@@ -24876,7 +24955,7 @@ export namespace Prisma {
     schemaUrl: string
     cnpj?: string | null
     isActive?: boolean
-    billingStatus?: string
+    billingStatus?: $Enums.BillingStatus
     createdAt?: Date | string
     updatedAt?: Date | string
     adminUsers?: AdminUserUncheckedCreateNestedManyWithoutTenantInput
@@ -24943,7 +25022,7 @@ export namespace Prisma {
     schemaUrl?: StringFieldUpdateOperationsInput | string
     cnpj?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
-    billingStatus?: StringFieldUpdateOperationsInput | string
+    billingStatus?: EnumBillingStatusFieldUpdateOperationsInput | $Enums.BillingStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     adminUsers?: AdminUserUpdateManyWithoutTenantNestedInput
@@ -24960,7 +25039,7 @@ export namespace Prisma {
     schemaUrl?: StringFieldUpdateOperationsInput | string
     cnpj?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
-    billingStatus?: StringFieldUpdateOperationsInput | string
+    billingStatus?: EnumBillingStatusFieldUpdateOperationsInput | $Enums.BillingStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     adminUsers?: AdminUserUncheckedUpdateManyWithoutTenantNestedInput
@@ -24993,7 +25072,7 @@ export namespace Prisma {
     schemaUrl: string
     cnpj?: string | null
     isActive?: boolean
-    billingStatus?: string
+    billingStatus?: $Enums.BillingStatus
     createdAt?: Date | string
     updatedAt?: Date | string
     adminUsers?: AdminUserCreateNestedManyWithoutTenantInput
@@ -25010,7 +25089,7 @@ export namespace Prisma {
     schemaUrl: string
     cnpj?: string | null
     isActive?: boolean
-    billingStatus?: string
+    billingStatus?: $Enums.BillingStatus
     createdAt?: Date | string
     updatedAt?: Date | string
     adminUsers?: AdminUserUncheckedCreateNestedManyWithoutTenantInput
@@ -25067,7 +25146,7 @@ export namespace Prisma {
     schemaUrl?: StringFieldUpdateOperationsInput | string
     cnpj?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
-    billingStatus?: StringFieldUpdateOperationsInput | string
+    billingStatus?: EnumBillingStatusFieldUpdateOperationsInput | $Enums.BillingStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     adminUsers?: AdminUserUpdateManyWithoutTenantNestedInput
@@ -25084,7 +25163,7 @@ export namespace Prisma {
     schemaUrl?: StringFieldUpdateOperationsInput | string
     cnpj?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
-    billingStatus?: StringFieldUpdateOperationsInput | string
+    billingStatus?: EnumBillingStatusFieldUpdateOperationsInput | $Enums.BillingStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     adminUsers?: AdminUserUncheckedUpdateManyWithoutTenantNestedInput
@@ -25128,7 +25207,7 @@ export namespace Prisma {
     schemaUrl: string
     cnpj?: string | null
     isActive?: boolean
-    billingStatus?: string
+    billingStatus?: $Enums.BillingStatus
     createdAt?: Date | string
     updatedAt?: Date | string
     adminUsers?: AdminUserCreateNestedManyWithoutTenantInput
@@ -25145,7 +25224,7 @@ export namespace Prisma {
     schemaUrl: string
     cnpj?: string | null
     isActive?: boolean
-    billingStatus?: string
+    billingStatus?: $Enums.BillingStatus
     createdAt?: Date | string
     updatedAt?: Date | string
     adminUsers?: AdminUserUncheckedCreateNestedManyWithoutTenantInput
@@ -25366,7 +25445,7 @@ export namespace Prisma {
     schemaUrl?: StringFieldUpdateOperationsInput | string
     cnpj?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
-    billingStatus?: StringFieldUpdateOperationsInput | string
+    billingStatus?: EnumBillingStatusFieldUpdateOperationsInput | $Enums.BillingStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     adminUsers?: AdminUserUpdateManyWithoutTenantNestedInput
@@ -25383,7 +25462,7 @@ export namespace Prisma {
     schemaUrl?: StringFieldUpdateOperationsInput | string
     cnpj?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
-    billingStatus?: StringFieldUpdateOperationsInput | string
+    billingStatus?: EnumBillingStatusFieldUpdateOperationsInput | $Enums.BillingStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     adminUsers?: AdminUserUncheckedUpdateManyWithoutTenantNestedInput
@@ -26753,7 +26832,7 @@ export namespace Prisma {
     schemaUrl: string
     cnpj?: string | null
     isActive?: boolean
-    billingStatus?: string
+    billingStatus?: $Enums.BillingStatus
     createdAt?: Date | string
     updatedAt?: Date | string
     adminUsers?: AdminUserCreateNestedManyWithoutTenantInput
@@ -26770,7 +26849,7 @@ export namespace Prisma {
     schemaUrl: string
     cnpj?: string | null
     isActive?: boolean
-    billingStatus?: string
+    billingStatus?: $Enums.BillingStatus
     createdAt?: Date | string
     updatedAt?: Date | string
     adminUsers?: AdminUserUncheckedCreateNestedManyWithoutTenantInput
@@ -27003,7 +27082,7 @@ export namespace Prisma {
     schemaUrl?: StringFieldUpdateOperationsInput | string
     cnpj?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
-    billingStatus?: StringFieldUpdateOperationsInput | string
+    billingStatus?: EnumBillingStatusFieldUpdateOperationsInput | $Enums.BillingStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     adminUsers?: AdminUserUpdateManyWithoutTenantNestedInput
@@ -27020,7 +27099,7 @@ export namespace Prisma {
     schemaUrl?: StringFieldUpdateOperationsInput | string
     cnpj?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
-    billingStatus?: StringFieldUpdateOperationsInput | string
+    billingStatus?: EnumBillingStatusFieldUpdateOperationsInput | $Enums.BillingStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     adminUsers?: AdminUserUncheckedUpdateManyWithoutTenantNestedInput
@@ -27365,7 +27444,7 @@ export namespace Prisma {
     schemaUrl: string
     cnpj?: string | null
     isActive?: boolean
-    billingStatus?: string
+    billingStatus?: $Enums.BillingStatus
     createdAt?: Date | string
     updatedAt?: Date | string
     adminUsers?: AdminUserCreateNestedManyWithoutTenantInput
@@ -27382,7 +27461,7 @@ export namespace Prisma {
     schemaUrl: string
     cnpj?: string | null
     isActive?: boolean
-    billingStatus?: string
+    billingStatus?: $Enums.BillingStatus
     createdAt?: Date | string
     updatedAt?: Date | string
     adminUsers?: AdminUserUncheckedCreateNestedManyWithoutTenantInput
@@ -27415,7 +27494,7 @@ export namespace Prisma {
     schemaUrl?: StringFieldUpdateOperationsInput | string
     cnpj?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
-    billingStatus?: StringFieldUpdateOperationsInput | string
+    billingStatus?: EnumBillingStatusFieldUpdateOperationsInput | $Enums.BillingStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     adminUsers?: AdminUserUpdateManyWithoutTenantNestedInput
@@ -27432,7 +27511,7 @@ export namespace Prisma {
     schemaUrl?: StringFieldUpdateOperationsInput | string
     cnpj?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
-    billingStatus?: StringFieldUpdateOperationsInput | string
+    billingStatus?: EnumBillingStatusFieldUpdateOperationsInput | $Enums.BillingStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     adminUsers?: AdminUserUncheckedUpdateManyWithoutTenantNestedInput
@@ -27449,7 +27528,7 @@ export namespace Prisma {
     schemaUrl: string
     cnpj?: string | null
     isActive?: boolean
-    billingStatus?: string
+    billingStatus?: $Enums.BillingStatus
     createdAt?: Date | string
     updatedAt?: Date | string
     adminUsers?: AdminUserCreateNestedManyWithoutTenantInput
@@ -27466,7 +27545,7 @@ export namespace Prisma {
     schemaUrl: string
     cnpj?: string | null
     isActive?: boolean
-    billingStatus?: string
+    billingStatus?: $Enums.BillingStatus
     createdAt?: Date | string
     updatedAt?: Date | string
     adminUsers?: AdminUserUncheckedCreateNestedManyWithoutTenantInput
@@ -27499,7 +27578,7 @@ export namespace Prisma {
     schemaUrl?: StringFieldUpdateOperationsInput | string
     cnpj?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
-    billingStatus?: StringFieldUpdateOperationsInput | string
+    billingStatus?: EnumBillingStatusFieldUpdateOperationsInput | $Enums.BillingStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     adminUsers?: AdminUserUpdateManyWithoutTenantNestedInput
@@ -27516,7 +27595,7 @@ export namespace Prisma {
     schemaUrl?: StringFieldUpdateOperationsInput | string
     cnpj?: NullableStringFieldUpdateOperationsInput | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
-    billingStatus?: StringFieldUpdateOperationsInput | string
+    billingStatus?: EnumBillingStatusFieldUpdateOperationsInput | $Enums.BillingStatus
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     adminUsers?: AdminUserUncheckedUpdateManyWithoutTenantNestedInput

@@ -7,7 +7,7 @@
 // administradores globais via e-mail e senha. Utiliza a estratégia 'local-admin'.
 //
 // Versão: 1.0.4
-// Equipe SmartPeças + Refatoração IA
+// Equipe SmartPeças
 // Atualizado em: 08/07/2025
 // =============================================================================
 

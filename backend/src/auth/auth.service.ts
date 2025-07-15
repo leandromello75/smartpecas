@@ -6,9 +6,9 @@
 // Descrição: Serviço de autenticação para administradores globais,
 // com validação de credenciais, geração de JWT e checagem de status de tenant.
 //
-// Versão: 3.1.5
+// Versão: 3.1.6
 // Equipe SmartPeças + Refatoração IA
-// Atualizado em: 08/07/2025
+// Atualizado em: 07/07/2025 (Corrigido em 08/07/2025)
 // =============================================================================
 
 import {
@@ -21,12 +21,12 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
-import { AdminUser, Role } from '../generated/prisma-client';
-import { JwtAdminPayload } from '../shared/interfaces/jwt-payload.interface';
-import { LoginRateLimiterService } from './login-rate-limiter.service';
+import { AdminUser, Role } from '../generated/prisma-client'; 
+import { JwtAdminPayload } from '../shared/interfaces/jwt-payload.interface'; 
+import { LoginRateLimiterService } from './login-rate-limiter.service'; 
 
-type AdminUserWithTenant = AdminUser & {
-    tenant: { id: string; billingStatus: string; isActive: boolean } | null
+type AdminUserWithTenant = AdminUser & { 
+    tenant: { id: string; billingStatus: string; isActive: boolean } | null 
 };
 
 @Injectable()
@@ -76,7 +76,7 @@ export class AuthService {
     }
 
     const { password, ...safeUser } = adminUser;
-    return safeUser as Omit<AdminUserWithTenant, 'password'>;
+    return safeUser as Omit<AdminUserWithTenant, 'password'>; 
   }
 
   /**
@@ -92,11 +92,12 @@ export class AuthService {
     email: string,
     password_plain: string,
     ip: string,
+    userAgent?: string // ESTA É A LINHA CRÍTICA: userAgent como parâmetro opcional
   ): Promise<{
     access_token: string;
     expires_in: number;
     user: { id: string; email: string; name: string | null };
-  }> { // CORREÇÃO: Tipo de retorno completo
+  }> {
     this.logger.debug(`Tentativa de login para adminUser: ${email} do IP: ${ip}`);
 
     await this.loginRateLimiterService.checkAttempts(email, ip);
@@ -126,15 +127,13 @@ export class AuthService {
       tenantId: adminUserValidated.tenantId ?? null,
       name: adminUserValidated.name ?? null,
       ip: ip ?? null,
-      // Opcional: Adicionar userAgent ao payload se for usar para algo além de auditoria de log bruto.
-      // userAgent: userAgent ?? null, 
+      userAgent: userAgent ?? null,
     };
 
     const token = this.jwtService.sign(payload);
     
-    // Calcula o tempo de expiração em segundos a partir do token
     const decodedToken = this.jwtService.decode(token) as { exp?: number };
-    const expiresIn = decodedToken.exp ? decodedToken.exp - Math.floor(Date.now() / 1000) : 3600; // Padrão 1 hora se não houver exp
+    const expiresIn = decodedToken.exp ? decodedToken.exp - Math.floor(Date.now() / 1000) : 3600;
 
     this.logger.debug(`Gerando JWT para adminUser: ${adminUserValidated.email}`);
     
