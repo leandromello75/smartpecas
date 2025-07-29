@@ -1,64 +1,51 @@
 # =============================================================================
-# SmartPeças ERP - docker-compose.yml (Versão de Produção)
+# SmartPeças ERP - docker-compose.yml (Estrutura Monorepo)
 # =============================================================================
 # Arquivo: /smartpecas/docker-compose.yml
 #
-# Descrição: Orquestra os serviços de produção do SmartPeças ERP.
+# Descrição: Orquestra os serviços para o ambiente de DESENVOLVIMENTO,
+# com hot-reload para o backend e healthcheck para o banco de dados.
 #
-# Versão: Final 2.0
+# Versão: 2.1 (Desenvolvimento)
+# Equipe SmartPeças
+# Atualizado em: 22/07/2025
 # =============================================================================
 
-version: "3.9"
-
 services:
-  # 🐘 Banco de Dados PostgreSQL
   db:
     image: postgres:15-alpine
     container_name: smartpecas_db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
     volumes:
       - postgres_data:/var/lib/postgresql/data
-    networks:
-      - smartpecas_net
     ports:
-      # OPCIONAL: Para debug externo. Mantenha a porta 5432 bloqueada no firewall.
-      - "54321:5432"
+      - "5432:5432"
     healthcheck:
-      # ✅ VERIFICA se o banco está realmente pronto para aceitar conexões.
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
 
-  # 🚀 Backend NestJS
   backend:
-    build:
-      context: .
-      dockerfile: backend/Dockerfile
+    build: . # Constrói a partir da raiz
     container_name: smartpecas_backend
-    restart: unless-stopped
-    env_file:
-      - .env
+    command: npm run start:backend # Roda o script definido no root package.json
+    env_file: .env
     ports:
-      # ✅ Usa a porta dinâmica do .env, como sugerido pela equipe.
       - "${PORT}:${PORT}"
     depends_on:
       db:
-        # ✅ Garante que o backend só inicia APÓS o healthcheck do 'db' passar.
         condition: service_healthy
-    networks:
-      - smartpecas_net
-    # ❌ A linha de 'volumes' foi REMOVIDA, pois é um padrão de desenvolvimento, não de produção.
+    volumes:
+      # Mapeia as pastas necessárias para o hot-reload
+      - ./packages/backend:/usr/src/app/packages/backend
+      - ./prisma:/usr/src/app/prisma
+      # Exclui a node_modules para usar a do contêiner
+      - /usr/src/app/node_modules
 
 volumes:
   postgres_data:
-    driver: local
-
-networks:
-  # ✅ Usa a rede customizada, como sugerido pela equipe.
-  smartpecas_net:
-    driver: bridge

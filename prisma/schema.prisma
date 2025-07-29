@@ -1,44 +1,38 @@
 // =============================================================================
-// SmartPeças ERP - Schema Prisma (UNIFICADO)
+// SmartPeças ERP - Schema Prisma (VERSÃO FINAL E CONSOLIDADA)
 // =============================================================================
 // Arquivo: prisma/schema.prisma
 //
-// Descrição: Define TODOS os modelos e enums para a aplicação SmartPeças ERP.
-// Esta é a abordagem mais robusta para arquiteturas multi-tenant com schema compartilhado,
-// garantindo que o Prisma possa gerar um único cliente e migrações sem erros de validação.
+// Descrição: Schema unificado com a modelagem completa da equipe e todas as
+// correções de ordem, tipos e constraints aplicadas.
 //
-// Versão: 1.0.1 (Schema Unificado)
+// Versão: 2.2.0
 // Equipe SmartPeças
-// Atualizado em: 04/07/2025 - 10:45 PM BRT
+// Atualizado em: 22/07/2025
 // =============================================================================
 
-generator client { // Gerador ÚNICO e padrão para o cliente unificado
+generator client {
   provider = "prisma-client-js"
-  output   = "../backend/src/generated/prisma-client" // Saída unificada padrão
+  output   = "./src/generated/prisma-client"
 }
 
-datasource db { // Datasource ÚNICA
+
+datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-// =============================================================================
-// ENUMS GLOBAIS (TODOS AQUI, UMA ÚNICA VEZ)
-// =============================================================================
+// --- ENUMS ---
 
 enum Role {
   USER
   ADMIN
   GUEST
-
-  @@map("user_role")
 }
 
 enum TipoCliente {
   PESSOA_FISICA
   PESSOA_JURIDICA
-
-  @@map("tipo_cliente")
 }
 
 enum TipoEndereco {
@@ -46,65 +40,188 @@ enum TipoEndereco {
   RESIDENCIAL
   ENTREGA
   COBRANCA
-
-  @@map("tipo_endereco")
-}
-
-enum TipoNegocio {
-  OFICINA
-  LOJA
-  DISTRIBUIDOR
-}
-
-enum FrequenciaCompra {
-  ALTA
-  MEDIA
-  BAIXA
-}
-
-enum FormaPagamentoPadrao {
-  VISTA
-  PRAZO
-  CARTAO
-}
-
-enum NivelConfidencialidade {
-  PUBLICO
-  INTERNO
-  CONFIDENCIAL
 }
 
 enum BillingStatus {
-  ACTIVE    @map("ACTIVE")
-  PAST_DUE  @map("PAST_DUE")
-  SUSPENDED @map("SUSPENDED")
-  // Adicione outros status se houver (e.g., TRIAL, CANCELLED)
+  ACTIVE
+  PAST_DUE
+  SUSPENDED
+}
+
+enum OperacaoAuditoria {
+  CRIAR
+  ATUALIZAR
+  EXCLUIR
+  RESTAURAR
+  LOGIN
+  EXPORTAR
+  DESATIVAR
+  REATIVAR
+  MARCAR_INADIMPLENTE
+  DESMARCAR_INADIMPLENTE
 }
 
 // =============================================================================
-// MODELOS (TODOS AQUI, UMA ÚNICA VEZ, COM SUAS RELAÇÕES COMPLETAS)
+// MODELOS EM ORDEM DE DEPENDÊNCIA
 // =============================================================================
 
-// == Modelos Globais ==
-model Tenant {
-  id               String           @id @default(uuid())
-  name             String
-  schemaUrl        String           @unique @map("schema_url")
-  cnpj             String?          @unique
-  isActive         Boolean          @default(true)
-  billingStatus    BillingStatus    @default(ACTIVE)
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
+model Product {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  price       Decimal   @db.Decimal(10, 2)
+  sku         String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  tenantId    String
+  tenant      Tenant    @relation(fields: [tenantId], references: [id])
+  orderItems  OrderItem[]
 
-  adminUsers       AdminUser[]      // Relação com AdminUser
-  
-  // Relações com modelos de tenant-scope
-  users            User[]
-  products         Product[] // DEFINIÇÃO DO PRODUTO ESTÁ AGORA MAIS ACIMA NO ARQUIVO
-  clientes         Cliente[]
-  orders           Order[]
-  idempotencyKeys  IdempotencyKey[]
-  auditoriaLogs    AuditoriaLog[]
+  @@map("products")
+  @@index([tenantId])
+  @@unique([sku, tenantId])
+}
+
+model EnderecoCliente {
+  id          String       @id @default(uuid())
+  clienteId   String
+  cliente     Cliente      @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  tipo        TipoEndereco
+  cep         String
+  logradouro  String
+  numero      String
+  complemento String?
+  bairro      String
+  cidade      String
+  estado      String
+  isPrincipal Boolean      @default(false)
+  createdAt   DateTime     @default(now())   // ✅ CORREÇÃO: Nome padronizado
+  updatedAt   DateTime     @updatedAt // ✅ CORREÇÃO: Nome padronizado
+
+  @@map("enderecos_clientes")
+}
+
+model ContatoCliente {
+  id          String   @id @default(uuid())
+  clienteId   String
+  cliente     Cliente  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  nome        String
+  email       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("contatos_clientes")
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  quantity  Int
+  unitPrice Decimal @db.Decimal(10, 2)
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@map("order_items")
+  @@unique([orderId, productId])
+}
+
+model Order {
+  id          String    @id @default(uuid())
+  totalAmount Decimal   @db.Decimal(10, 2)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  tenantId    String
+  tenant      Tenant    @relation(fields: [tenantId], references: [id])
+  customerId  String
+  customer    Cliente   @relation(fields: [customerId], references: [id])
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  items       OrderItem[]
+
+  @@map("orders")
+}
+
+model IdempotencyKey {
+  key       String
+  tenantId  String
+  response  Json
+  createdAt DateTime @default(now())
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+
+  @@id([key, tenantId])
+}
+
+model AuditoriaLog {
+  id           String            @id @default(uuid())
+  tenantId     String
+  recurso      String
+  recursoId    String
+  operacao     OperacaoAuditoria
+  dados        Json
+  realizadoPor String
+  realizadoEm  DateTime          @default(now())
+  tenant       Tenant            @relation(fields: [tenantId], references: [id])
+
+  @@map("auditoria_log")
+}
+
+model Cliente {
+  id           String      @id @default(uuid())
+  tipoCliente  TipoCliente
+  nome         String
+  nomeFantasia String?
+  documento    String
+  email        String?
+  isAtivo      Boolean     @default(true)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  tenantId     String
+  tenant       Tenant      @relation(fields: [tenantId], references: [id])
+
+  enderecos EnderecoCliente[]
+  contatos  ContatoCliente[]
+  orders    Order[]
+
+  @@map("clientes")
+  @@unique([documento, tenantId])
+  @@unique([id, tenantId], name: "id_tenantId")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String?
+  role      Role     @default(ADMIN)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  orders    Order[]
+
+  @@map("users")
+  @@index([tenantId])
+}
+
+model Tenant {
+  id            String         @id @default(uuid())
+  name          String
+  schemaUrl       String         @unique @map("schema_url")
+  cnpj            String?        @unique
+  isActive        Boolean        @default(true)
+  billingStatus   BillingStatus  @default(ACTIVE)
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  adminUsers    AdminUser[]
+  users         User[]
+  products      Product[]
+  clientes      Cliente[]
+  orders        Order[]
+  idempotencyKeys IdempotencyKey[]
+  auditoriaLogs AuditoriaLog[]
 
   @@map("tenants")
 }
@@ -114,323 +231,13 @@ model AdminUser {
   email     String   @unique
   password  String
   name      String?
-  role      String?  @default("admin")
+  role      Role     @default(ADMIN) // ✅ CORREÇÃO: Usando o enum Role
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  tenantId String
-  tenant   Tenant @relation(fields: [tenantId], references: [id])
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
 
   @@map("admin_users")
 }
 
-// == Modelos Específicos de Tenant (Ordem ajustada) ==
-
-model User {
-  id        String    @id @default(uuid())
-  email     String    @unique
-  password  String
-  name      String?
-  role      Role      @default(USER)
-  isActive  Boolean   @default(true)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-
-  tenantId  String
-  tenant    Tenant    @relation(fields: [tenantId], references: [id])
-
-  orders    Order[]
-
-  @@map("users")
-  @@index([tenantId])
-}
-
-// CORREÇÃO: MODELO PRODUCT MOVIDO PARA CIMA, APÓS USER, PARA RESOLVER DEPENDÊNCIAS
-model Product {
-  id          String    @id @default(uuid())
-  name        String
-  description String?
-  price       Decimal   @db.Decimal(10, 2)
-  sku         String?   @unique
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  tenantId    String
-  tenant      Tenant    @relation(fields: [tenantId], references: [id])
-
-  orderItems  OrderItem[] // OrderItem é definido abaixo, mas isso é OK, ele será resolvido
-
-  @@map("products")
-  @@index([tenantId])
-}
-
-model Cliente {
-  id                      String              @id @default(uuid())
-  tipoCliente             TipoCliente
-  nome                    String
-  nomeFantasia            String?
-  documento               String              @unique
-  documentoTipo           String
-  documentoValido         Boolean             @default(false)
-  documentoValidadoEm     DateTime?
-  inscricaoEstadual       String?
-  inscricaoMunicipal      String?
-
-  email                   String?
-  telefone                   String?
-  celular                 String?
-  website                 String?
-
-  cep                     String?
-  logradouro              String?
-  numero                  String?
-  complemento             String?
-  bairro                  String?
-  cidade                  String?
-  estado                  String?
-  pais                    String?             @default("Brasil")
-
-  isInadimplente          Boolean             @default(false)
-  limiteCredito           Decimal?            @db.Decimal(15,2)
-  limiteCreditoUsado      Decimal?            @db.Decimal(15,2)
-  diasPagamento           Int?                @default(30)
-  formaPagamentoPadrao    String?
-  descontoMaximo          Decimal?            @db.Decimal(5,2)
-  comissaoVendedor        Decimal?            @db.Decimal(5,2)
-  observacoes             String?
-
-  tipoNegocio             String?
-  especialidades          String[]
-  marcasAtendidas         String[]
-  certificacoes           String[]
-  temOficina              Boolean             @default(false)
-  temBalcao               Boolean             @default(true)
-
-  totalPedidos            Int                 @default(0)
-  valorTotalCompras       Decimal?            @db.Decimal(15,2)
-  ultimaCompra            DateTime?
-  frequenciaCompra        String?
-  scoreCliente            Int?
-
-  acessoRestrito          Boolean             @default(false)
-  gruposAcesso            String[]
-  nivelConfidencialidade  String?             @default("INTERNO")
-
-  isAtivo                 Boolean             @default(true)
-  deletedAt               DateTime?
-  deletedBy               String?
-  deleteReason            String?
-  criadoEm                DateTime            @default(now())
-  atualizadoEm            DateTime            @updatedAt
-  criadoPor               String?
-  criadoPorNome           String?
-  criadoPorIp             String?
-  atualizadoPor           String?
-  atualizadoPorNome       String?
-  atualizadoPorIp         String?
-  versao                  Int                 @default(1)
-
-  anoMes                  String
-  trimestre               String
-
-  dadosCnpjApi            Json?
-  dadosCepApi             Json?
-  ultimaConsultaCnpj      DateTime?
-  ultimaConsultaCep       DateTime?
-
-  tenantId                String
-  tenant                  Tenant              @relation(fields: [tenantId], references: [id])
-
-  enderecos               EnderecoCliente[]
-  contatos                ContatoCliente[]
-  veiculos                VeiculoCliente[]
-  historico               HistoricoCliente[]
-  orders                  Order[]
-
-  @@map("clientes")
-  @@index([tenantId, isAtivo])
-  @@index([tenantId, isInadimplente])
-  @@index([tenantId, documento])
-  @@index([tenantId, email])
-  @@index([tenantId, nome])
-  @@index([tenantId, criadoEm])
-  @@index([tenantId, atualizadoEm])
-  @@index([tenantId, ultimaCompra])
-  @@index([tenantId, scoreCliente])
-  @@index([anoMes])
-  @@index([trimestre])
-  @@index([documentoTipo, documentoValido])
-}
-
-model EnderecoCliente {
-  id           String       @id @default(uuid())
-  clienteId    String
-  cliente      Cliente      @relation(fields: [clienteId], references: [id], onDelete: Cascade)
-  tipo         TipoEndereco
-  descricao    String?
-  cep          String
-  logradouro   String
-  numero       String
-  complemento  String?
-  bairro       String
-  cidade       String
-  estado       String
-  pais         String       @default("Brasil")
-  isPrincipal  Boolean      @default(false)
-  isAtivo      Boolean      @default(true)
-  criadoEm     DateTime     @default(now())
-  atualizadoEm DateTime     @updatedAt
-  @@map("enderecos_clientes")
-  @@index([clienteId])
-  @@index([isPrincipal])
-}
-
-model ContatoCliente {
-  id           String   @id @default(uuid())
-  clienteId    String
-  cliente      Cliente  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
-  nome         String
-  cargo        String?
-  email        String?
-  telefone     String?
-  celular      String?
-  observacoes  String?
-  isPrincipal  Boolean  @default(false)
-  isAtivo      Boolean  @default(true)
-  criadoEm     DateTime @default(now())
-  atualizadoEm DateTime @updatedAt
-  @@map("contatos_clientes")
-  @@index([clienteId])
-  @@index([email])
-}
-
-model VeiculoCliente {
-  id              String   @id @default(uuid())
-  clienteId       String
-  cliente         Cliente  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
-  veiculoGlobalId String
-  placa           String?
-  cor             String?
-  anoFabricacao   Int?
-  anoModelo       Int?
-  quilometragem   Int?
-  observacoes     String?
-  isPrincipal     Boolean  @default(false)
-  isAtivo         Boolean  @default(true)
-  criadoEm        DateTime @default(now())
-  atualizadoEm    DateTime @updatedAt
-  @@map("veiculos_clientes")
-  @@index([clienteId])
-  @@index([veiculoGlobalId])
-  @@index([placa])
-}
-
-model HistoricoCliente {
-  id          String   @id @default(uuid())
-  clienteId   String
-  cliente     Cliente  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
-  tipo        String   // COMPRA, PAGAMENTO, ALTERACAO...
-  descricao   String
-  valor       Decimal? @db.Decimal(15,2)
-  observacoes String?
-  criadoEm    DateTime @default(now())
-  criadoPor   String?
-  @@map("historico_clientes")
-  @@index([clienteId, tipo])
-  @@index([clienteId, criadoEm])
-}
-
-model Order {
-  id          String    @id @default(uuid())
-  orderDate   DateTime  @default(now())
-  totalAmount Decimal   @db.Decimal(10, 2)
-  status      String    @default("pending")
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-
-  tenantId    String
-  tenant      Tenant    @relation(fields: [tenantId], references: [id])
-
-  customerId  String
-  customer    Cliente   @relation(fields: [customerId], references: [id])
-
-  userId      String
-  user        User      @relation(fields: [userId], references: [id])
-
-  items       OrderItem[]
-
-  @@map("orders")
-  @@index([tenantId])
-}
-
-model OrderItem {
-  id          String  @id @default(uuid())
-  quantity    Int
-  unitPrice   Decimal @db.Decimal(10, 2)
-
-  orderId     String
-  order       Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
-
-  productId   String
-  product     Product @relation(fields: [productId], references: [id])
-
-  @@map("order_items")
-  @@unique([orderId, productId])
-}
-
-// =============================================================================
-// MODELO: IdempotencyKey
-// =============================================================================
-
-model IdempotencyKey {
-  key         String
-  tenantId    String
-  route       String
-  response    Json
-  createdAt   DateTime @default(now())
-  expiresAt   DateTime
-  origin      String?
-
-  tenant      Tenant    @relation(fields: [tenantId], references: [id])
-
-  @@id([key, tenantId])
-  @@index([tenantId])
-}
-
-// =============================================================================
-// MODELO: AuditoriaLog
-// =============================================================================
-
-model AuditoriaLog {
-  id              String   @id @default(uuid())
-  tenantId        String
-  recurso         String
-  recursoId       String
-  operacao        String
-  dadosAnteriores Json
-  dadosAtuais     Json
-  realizadoPor    String
-  realizadoPorNome String
-  realizadoPorIp  String?
-  userAgent       String?
-  realizadoEm     DateTime @default(now())
-
-  tenant          Tenant   @relation(fields: [tenantId], references: [id])
-
-  @@map("auditoria_log")
-  @@index([tenantId, recurso, recursoId])
-  @@index([realizadoPor])
-  @@index([realizadoEm])
-}
-
-// =============================================================================
-// MODELO: OrderStatus
-// =============================================================================
-enum OrderStatus {
-  PENDING     @map("pending")
-  PROCESSING  @map("processing")
-  COMPLETED   @map("completed")
-  CANCELLED   @map("cancelled")
-  // Adicione outros status conforme necessário para suas ordens
-}

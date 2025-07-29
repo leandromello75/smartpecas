@@ -1,0 +1,2 @@
+-- CreateEnum
+CREATE TYPE "OperacaoAuditoria" AS ENUM ('CRIAR', 'ATUALIZAR', 'EXCLUIR', 'RESTAURAR', 'LOGIN', 'EXPORTAR');
