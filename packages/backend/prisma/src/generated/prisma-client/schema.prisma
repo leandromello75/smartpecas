@@ -1,0 +1,241 @@
+// =============================================================================
+// SmartPeças ERP - Schema Prisma (VERSÃO FINAL E CONSOLIDADA)
+// =============================================================================
+// Arquivo: prisma/schema.prisma
+//
+// Descrição: Schema unificado com a modelagem completa da equipe e todas as
+// correções de ordem, tipos e constraints aplicadas.
+//
+// Versão: 2.2.0
+// Equipe SmartPeças
+// Atualizado em: 22/07/2025
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "./src/generated/prisma-client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- ENUMS ---
+
+enum Role {
+  USER
+  ADMIN
+  GUEST
+}
+
+enum TipoCliente {
+  PESSOA_FISICA
+  PESSOA_JURIDICA
+}
+
+enum TipoEndereco {
+  COMERCIAL
+  RESIDENCIAL
+  ENTREGA
+  COBRANCA
+}
+
+enum BillingStatus {
+  ACTIVE
+  PAST_DUE
+  SUSPENDED
+}
+
+enum OperacaoAuditoria {
+  CRIAR
+  ATUALIZAR
+  EXCLUIR
+  RESTAURAR
+  LOGIN
+  EXPORTAR
+  DESATIVAR
+  REATIVAR
+  MARCAR_INADIMPLENTE
+  DESMARCAR_INADIMPLENTE
+}
+
+// =============================================================================
+// MODELOS EM ORDEM DE DEPENDÊNCIA
+// =============================================================================
+
+model Product {
+  id          String      @id @default(uuid())
+  name        String
+  description String?
+  price       Decimal     @db.Decimal(10, 2)
+  sku         String?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  tenantId    String
+  tenant      Tenant      @relation(fields: [tenantId], references: [id])
+  orderItems  OrderItem[]
+
+  @@unique([sku, tenantId])
+  @@index([tenantId])
+  @@map("products")
+}
+
+model EnderecoCliente {
+  id          String       @id @default(uuid())
+  clienteId   String
+  cliente     Cliente      @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  tipo        TipoEndereco
+  cep         String
+  logradouro  String
+  numero      String
+  complemento String?
+  bairro      String
+  cidade      String
+  estado      String
+  isPrincipal Boolean      @default(false)
+  createdAt   DateTime     @default(now()) // ✅ CORREÇÃO: Nome padronizado
+  updatedAt   DateTime     @updatedAt // ✅ CORREÇÃO: Nome padronizado
+
+  @@map("enderecos_clientes")
+}
+
+model ContatoCliente {
+  id        String   @id @default(uuid())
+  clienteId String
+  cliente   Cliente  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  nome      String
+  email     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("contatos_clientes")
+}
+
+model OrderItem {
+  id        String  @id @default(uuid())
+  quantity  Int
+  unitPrice Decimal @db.Decimal(10, 2)
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@unique([orderId, productId])
+  @@map("order_items")
+}
+
+model Order {
+  id          String      @id @default(uuid())
+  totalAmount Decimal     @db.Decimal(10, 2)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  tenantId    String
+  tenant      Tenant      @relation(fields: [tenantId], references: [id])
+  customerId  String
+  customer    Cliente     @relation(fields: [customerId], references: [id])
+  userId      String
+  user        User        @relation(fields: [userId], references: [id])
+  items       OrderItem[]
+
+  @@map("orders")
+}
+
+model IdempotencyKey {
+  key       String
+  tenantId  String
+  response  Json
+  createdAt DateTime @default(now())
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+
+  @@id([key, tenantId])
+}
+
+model AuditoriaLog {
+  id           String            @id @default(uuid())
+  tenantId     String
+  recurso      String
+  recursoId    String
+  operacao     OperacaoAuditoria
+  dados        Json
+  realizadoPor String
+  realizadoEm  DateTime          @default(now())
+  tenant       Tenant            @relation(fields: [tenantId], references: [id])
+
+  @@map("auditoria_log")
+}
+
+model Cliente {
+  id           String      @id @default(uuid())
+  tipoCliente  TipoCliente
+  nome         String
+  nomeFantasia String?
+  documento    String
+  email        String?
+  isAtivo      Boolean     @default(true)
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  tenantId     String
+  tenant       Tenant      @relation(fields: [tenantId], references: [id])
+
+  enderecos EnderecoCliente[]
+  contatos  ContatoCliente[]
+  orders    Order[]
+
+  @@unique([documento, tenantId])
+  @@unique([id, tenantId], name: "id_tenantId")
+  @@map("clientes")
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String?
+  role      Role     @default(ADMIN)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+  orders    Order[]
+
+  @@index([tenantId])
+  @@map("users")
+}
+
+model Tenant {
+  id            String        @id @default(uuid())
+  name          String
+  schemaUrl     String        @unique @map("schema_url")
+  cnpj          String?       @unique
+  isActive      Boolean       @default(true)
+  billingStatus BillingStatus @default(ACTIVE)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  adminUsers      AdminUser[]
+  users           User[]
+  products        Product[]
+  clientes        Cliente[]
+  orders          Order[]
+  idempotencyKeys IdempotencyKey[]
+  auditoriaLogs   AuditoriaLog[]
+
+  @@map("tenants")
+}
+
+model AdminUser {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String?
+  role      Role     @default(ADMIN) // ✅ CORREÇÃO: Usando o enum Role
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  tenantId  String
+  tenant    Tenant   @relation(fields: [tenantId], references: [id])
+
+  @@map("admin_users")
+}
