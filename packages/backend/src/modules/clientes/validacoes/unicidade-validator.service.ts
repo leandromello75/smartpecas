@@ -12,6 +12,7 @@
 // =============================================================================
 
 import { Injectable, ConflictException, Logger } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../../prisma/prisma.service';
 
 @Injectable()
@@ -38,7 +39,7 @@ export class UnicidadeValidatorService {
 ) {
     const docLimpo = this.limparDocumento(documento);
 
-    const clienteExistente = await this.prisma.cliente.findFirst({
+    const clienteExistente = await prismaClient.cliente.findFirst({
       where: {
         tenantId,
         documento: docLimpo,
@@ -61,7 +62,7 @@ export class UnicidadeValidatorService {
   clienteId?: string,
   prismaClient: Prisma.TransactionClient | PrismaService = this.prisma,
 ) {
-    const clienteExistente = await this.prisma.cliente.findFirst({
+    const clienteExistente = await prismaClient.cliente.findFirst({
       where: {
         tenantId,
         email,
