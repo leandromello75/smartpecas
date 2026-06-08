@@ -1,0 +1,40 @@
+# =============================================================================
+# SmartPeças ERP - Configuração Railway
+# =============================================================================
+# Arquivo: railway.toml
+#
+# Descrição: Configura o deploy automático do backend NestJS no Railway,
+# usando o Dockerfile existente e conectando ao PostgreSQL gerenciado.
+#
+# Versão: 1.0.0
+# =============================================================================
+
+[build]
+  # Usa o Dockerfile existente na raiz do projeto
+  builder         = "dockerfile"
+  dockerfilePath  = "Dockerfile"
+
+[deploy]
+  # Comando de inicialização — aponta para o build do NestJS
+  startCommand        = "node packages/backend/dist/main"
+
+  # Rota que o Railway usa para verificar se o serviço está saudável
+  # Certifique-se de que existe um endpoint GET /health no NestJS
+  healthcheckPath     = "/health"
+  healthcheckTimeout  = 30
+
+  # Reinicia automaticamente em caso de falha
+  restartPolicyType   = "on_failure"
+  restartPolicyMaxRetries = 3
+
+  # =============================================================================
+  # VARIÁVEIS DE AMBIENTE
+  # =============================================================================
+  # Configure estas variáveis no painel do Railway em:
+  # Projeto → Serviço backend → Variables
+  #
+  # DATABASE_URL     → gerado automaticamente ao adicionar PostgreSQL no Railway
+  # NODE_ENV         → production
+  # JWT_SECRET       → uma string longa e aleatória (ex: gerada com `openssl rand -base64 32`)
+  # PORT             → NÃO precisa definir, o Railway injeta automaticamente
+  # =============================================================================
