@@ -41,3 +41,6 @@ node_modules
 *.sublime-project
 *.sublime-workspace
 .DS_Store
+
+# Node
+node_modules/
