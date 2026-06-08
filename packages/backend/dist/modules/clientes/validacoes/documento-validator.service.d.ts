@@ -1,4 +1,0 @@
-import { TipoCliente } from '@prisma/client';
-export declare class DocumentoValidatorService {
-    validar(tipoCliente: TipoCliente, documento: string): void;
-}
