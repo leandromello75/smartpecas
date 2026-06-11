@@ -1,62 +1,53 @@
 # =============================================================================
-# SmartPeças ERP - Dockerfile do Backend (VERSÃO FINAL)
-# =============================================================================
-# Arquivo: Dockerfile (na raiz do projeto)
-#
-# Descrição: Constrói a aplicação NestJS num ambiente Docker, respeitando
-# a estrutura com a pasta 'prisma' na raiz e gerando o cliente no local
-# personalizado 'src/generated/prisma-client'.
-#
-# Versão: 3.1.0
-# Equipe SmartPeças
-# Atualizado em: 24/07/2025
+# SmartPeças ERP - Dockerfile do Backend
 # =============================================================================
 
-# ================================================================
-# Etapa 1: Builder - Instala as dependências, gera o Prisma e compila
-# ================================================================
 FROM node:20-alpine AS base
 WORKDIR /usr/src/app
 
-# Copia o package.json da raiz E do backend
+# Instalar dependências do sistema
+RUN apk add --no-cache openssl
+
+# Copiar package.json raiz e do backend
 COPY package*.json ./
 COPY packages/backend/package*.json ./packages/backend/
 
-# Instala TODAS as dependências a partir da raiz
-RUN npm install
+# Instalar todas as dependências
+RUN npm install --legacy-peer-deps
 
-# Copia o schema do Prisma
-COPY prisma ./prisma/
+# Copiar o schema Prisma do local correto
+COPY packages/backend/prisma ./packages/backend/prisma/
 
-# Gera o cliente Prisma
-RUN npx prisma generate
+# Gerar o cliente Prisma
+RUN cd packages/backend && npx prisma generate
 
-# Copia o código-fonte do backend
-COPY packages/backend ./packages/backend
+# Copiar código-fonte do backend
+COPY packages/backend/src ./packages/backend/src
+COPY packages/backend/tsconfig*.json ./packages/backend/
 
 # =============================================================================
-# Etapa de Build
+# Build
 # =============================================================================
 FROM base AS builder
 WORKDIR /usr/src/app
 
-# Executa o build do workspace 'backend'
-RUN npm run build:backend
+RUN cd packages/backend && npx nest build
 
 # =============================================================================
-# Etapa Final (Produção)
+# Produção
 # =============================================================================
 FROM node:20-alpine AS production
 WORKDIR /usr/src/app
 
-# Instala apenas as dependências de produção de forma otimizada
+RUN apk add --no-cache openssl
+
 COPY package*.json ./
 COPY packages/backend/package*.json ./packages/backend/
-RUN npm install --omit=dev
+RUN npm install --omit=dev --legacy-peer-deps
 
-# Copia o código compilado e o cliente Prisma gerado
+# Copiar build e Prisma Client gerado
 COPY --from=builder /usr/src/app/packages/backend/dist ./packages/backend/dist
-COPY --from=base /usr/src/app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=builder /usr/src/app/packages/backend/prisma/src/generated ./packages/backend/prisma/src/generated
 
 EXPOSE 3000
 CMD ["node", "packages/backend/dist/main"]
