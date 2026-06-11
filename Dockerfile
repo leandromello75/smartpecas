@@ -3,13 +3,13 @@ WORKDIR /usr/src/app
 
 RUN apk add --no-cache openssl
 
-# Copiar e instalar dependências do backend diretamente
+# Copiar e instalar dependências do backend
 COPY packages/backend/package*.json ./
 RUN npm install --legacy-peer-deps
 
-# Copiar schema Prisma e gerar client
+# Copiar schema Prisma e gerar client (usando versão instalada pelo npm)
 COPY packages/backend/prisma ./prisma/
-RUN npx prisma generate
+RUN ./node_modules/.bin/prisma generate
 
 # Copiar código fonte e tsconfig
 COPY packages/backend/src ./src
@@ -20,7 +20,7 @@ COPY packages/backend/tsconfig*.json ./
 # =============================================================================
 FROM base AS builder
 WORKDIR /usr/src/app
-RUN npx nest build
+RUN ./node_modules/.bin/nest build
 
 # =============================================================================
 # Produção
