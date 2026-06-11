@@ -47,7 +47,6 @@ RUN npm install --omit=dev --legacy-peer-deps
 
 # Copiar build e Prisma Client gerado
 COPY --from=builder /usr/src/app/packages/backend/dist ./packages/backend/dist
-COPY --from=builder /usr/src/app/packages/backend/prisma/src/generated ./packages/backend/prisma/src/generated
 
 EXPOSE 3000
 CMD ["node", "packages/backend/dist/main"]
