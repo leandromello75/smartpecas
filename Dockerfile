@@ -1,37 +1,26 @@
-# =============================================================================
-# SmartPeças ERP - Dockerfile do Backend
-# =============================================================================
-
 FROM node:20-alpine AS base
 WORKDIR /usr/src/app
 
-# Instalar dependências do sistema
 RUN apk add --no-cache openssl
 
-# Copiar package.json raiz e do backend
-COPY package*.json ./
-COPY packages/backend/package*.json ./packages/backend/
-
-# Instalar todas as dependências
+# Copiar e instalar dependências do backend diretamente
+COPY packages/backend/package*.json ./
 RUN npm install --legacy-peer-deps
 
-# Copiar o schema Prisma do local correto
-COPY packages/backend/prisma ./packages/backend/prisma/
+# Copiar schema Prisma e gerar client
+COPY packages/backend/prisma ./prisma/
+RUN npx prisma generate
 
-# Gerar o cliente Prisma
-RUN cd packages/backend && npx prisma generate
-
-# Copiar código-fonte do backend
-COPY packages/backend/src ./packages/backend/src
-COPY packages/backend/tsconfig*.json ./packages/backend/
+# Copiar código fonte e tsconfig
+COPY packages/backend/src ./src
+COPY packages/backend/tsconfig*.json ./
 
 # =============================================================================
 # Build
 # =============================================================================
 FROM base AS builder
 WORKDIR /usr/src/app
-
-RUN cd packages/backend && npx nest build
+RUN npx nest build
 
 # =============================================================================
 # Produção
@@ -41,13 +30,11 @@ WORKDIR /usr/src/app
 
 RUN apk add --no-cache openssl
 
-COPY package*.json ./
-COPY packages/backend/package*.json ./packages/backend/
+COPY packages/backend/package*.json ./
 RUN npm install --omit=dev --legacy-peer-deps
 
-# Copiar build e Prisma Client gerado
-COPY --from=builder /usr/src/app/packages/backend/dist ./packages/backend/dist
-COPY --from=builder /usr/src/app/packages/backend/prisma/src/generated ./packages/backend/prisma/src/generated
+COPY --from=builder /usr/src/app/dist ./dist
+COPY --from=base /usr/src/app/node_modules/.prisma ./node_modules/.prisma
 
 EXPOSE 3000
-CMD ["node", "packages/backend/dist/main"]
+CMD ["node", "dist/main"]
