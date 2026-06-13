@@ -1,4 +1,4 @@
-import { PrismaClient } from '../../prisma/src/generated/prisma-client';
+import { PrismaClient } from '@prisma/client';
 
 export function auditoriaMiddleware(prisma: PrismaClient) {
   prisma.$use(async (params: any, next: any) => {

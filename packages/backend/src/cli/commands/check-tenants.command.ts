@@ -13,7 +13,7 @@
 import { Command, CommandRunner } from 'nest-commander';
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-//import { Tenant } from '../../prisma/src/generated/prisma-client'; // Importar o modelo Tenant
+//import { Tenant } from '@prisma/client'; // Importar o modelo Tenant
 
 // NOVO: Definir uma interface para o tipo de Tenant retornado pela query 'select'
 interface TenantSubset {
@@ -75,7 +75,7 @@ export class CheckTenantsCommand extends CommandRunner {
       try {
         // Usa o getTenantClient para simular o acesso como um serviço de domínio
         // NOTE: O getTenantClient do PrismaService agora espera um tenantId, não schemaUrl
-        const tenantPrisma = this.prisma.getTenantClient(tenant.id); 
+        const tenantPrisma = this.prisma; 
         
         // Simular uma query simples filtrando pelo tenantId (ex: contar clientes)
         await tenantPrisma.cliente.count({ where: { tenantId: tenant.id } });

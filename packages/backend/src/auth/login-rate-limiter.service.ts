@@ -37,8 +37,8 @@ export class LoginRateLimiterService {
     const ipLockedKey = `login_locked_ip:${ip}`;
 
     // 1. Verificar se o e-mail ou IP já está bloqueado
-    const isEmailLocked = await this.cacheManager.get<boolean>(emailLockedKey);
-    const isIpLocked = await this.cacheManager.get<boolean>(ipLockedKey);
+    const isEmailLocked = await (this.cacheManager as any).get<boolean>(emailLockedKey);
+    const isIpLocked = await (this.cacheManager as any).get<boolean>(ipLockedKey);
 
     if (isEmailLocked || isIpLocked) {
       this.logger.warn(`Tentativa de login bloqueada para email: ${email}, IP: ${ip} (bloqueado por ${isEmailLocked ? 'email' : 'IP'})`);
@@ -46,13 +46,13 @@ export class LoginRateLimiterService {
     }
 
     // 2. Contar tentativas falhas (serão incrementadas por recordFailedAttempt)
-    const emailAttempts = (await this.cacheManager.get<number>(emailKey)) ?? 0;
-    const ipAttempts = (await this.cacheManager.get<number>(ipKey)) ?? 0;
+    const emailAttempts = (await (this.cacheManager as any).get<number>(emailKey)) ?? 0;
+    const ipAttempts = (await (this.cacheManager as any).get<number>(ipKey)) ?? 0;
 
     if (emailAttempts >= this.MAX_ATTEMPTS || ipAttempts >= this.MAX_ATTEMPTS) {
       // Bloquear email e IP
-      await this.cacheManager.set(emailLockedKey, true, this.LOCK_TIME_SECONDS);
-      await this.cacheManager.set(ipLockedKey, true, this.LOCK_TIME_SECONDS);
+      await (this.cacheManager as any).set(emailLockedKey, true, this.LOCK_TIME_SECONDS);
+      await (this.cacheManager as any).set(ipLockedKey, true, this.LOCK_TIME_SECONDS);
       this.logger.error(`Bloqueio de login ativado para email: ${email}, IP: ${ip}.`);
       throw new ThrottlerException('Muitas tentativas de login. Sua conta foi temporariamente bloqueada.');
     }
@@ -68,12 +68,12 @@ export class LoginRateLimiterService {
     const ipKey = `login_failed_ip:${ip}`;
 
     // Incrementar tentativas para o e-mail
-    const currentEmailAttempts = (await this.cacheManager.get<number>(emailKey)) ?? 0;
-    await this.cacheManager.set(emailKey, currentEmailAttempts + 1, this.ATTEMPT_WINDOW_SECONDS);
+    const currentEmailAttempts = (await (this.cacheManager as any).get<number>(emailKey)) ?? 0;
+    await (this.cacheManager as any).set(emailKey, currentEmailAttempts + 1, this.ATTEMPT_WINDOW_SECONDS);
 
     // Incrementar tentativas para o IP
-    const currentIpAttempts = (await this.cacheManager.get<number>(ipKey)) ?? 0;
-    await this.cacheManager.set(ipKey, currentIpAttempts + 1, this.ATTEMPT_WINDOW_SECONDS);
+    const currentIpAttempts = (await (this.cacheManager as any).get<number>(ipKey)) ?? 0;
+    await (this.cacheManager as any).set(ipKey, currentIpAttempts + 1, this.ATTEMPT_WINDOW_SECONDS);
 
     this.logger.warn(`Tentativa falha registrada para email: ${email}, IP: ${ip}. E-mail tentativas: ${currentEmailAttempts + 1}, IP tentativas: ${currentIpAttempts + 1}`);
   }
@@ -86,11 +86,11 @@ export class LoginRateLimiterService {
   async resetAttempts(email: string, ip: string): Promise<void> {
     const emailKey = `login_failed:${email}`;
     const ipKey = `login_failed_ip:${ip}`;
-    await this.cacheManager.del(emailKey);
-    await this.cacheManager.del(ipKey);
+    await (this.cacheManager as any).del(emailKey);
+    await (this.cacheManager as any).del(ipKey);
     // Também remova bloqueios, caso existam (se o usuário for desbloqueado manualmente ou após um período)
-    await this.cacheManager.del(`login_locked:${email}`);
-    await this.cacheManager.del(`login_locked_ip:${ip}`);
+    await (this.cacheManager as any).del(`login_locked:${email}`);
+    await (this.cacheManager as any).del(`login_locked_ip:${ip}`);
     this.logger.verbose(`Contadores de login resetados para email: ${email}, IP: ${ip}.`);
   }
 }

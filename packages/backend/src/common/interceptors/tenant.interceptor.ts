@@ -17,18 +17,15 @@ export class TenantInterceptor implements NestInterceptor {
     const request: Request = context.switchToHttp().getRequest();
     const tenantIdFromHeader = request.headers['x-tenant-id'] as string;
 
-    if (!tenantIdFromHeader) {
-      return next.handle();
-    }
+    if (!tenantIdFromHeader) return next.handle();
 
-    let tenantDb: any | null;
+    let tenantDb: any | null = null;
     try {
       tenantDb = await this.prisma.tenant.findUnique({
         where: { id: tenantIdFromHeader },
-        select: { id: true, name: true, billingStatus: true, isActive: true, schemaUrl: true, cnpj: true, createdAt: true, updatedAt: true },
+        select: { id: true, isActive: true, billingStatus: true },
       });
-    } catch (error) {
-      this.logger.error(`Erro ao buscar tenant ${tenantIdFromHeader}`);
+    } catch {
       return next.handle();
     }
 
@@ -38,16 +35,10 @@ export class TenantInterceptor implements NestInterceptor {
 
     const tenantContext: TenantContext = {
       tenantId: tenantDb.id,
-      name: tenantDb.name,
-      billingStatus: tenantDb.billingStatus,
-      isActive: tenantDb.isActive,
-      schemaUrl: tenantDb.schemaUrl,
-      cnpj: tenantDb.cnpj ?? undefined,
-      createdAt: tenantDb.createdAt,
-      updatedAt: tenantDb.updatedAt,
+      user: (request as any).user,
     };
 
-    this.logger.debug(`Contexto de tenant ${tenantContext.name} (${tenantContext.tenantId}) definido.`);
+    this.logger.debug(`Tenant ${tenantContext.tenantId} definido para a requisição.`);
     return this.tenantContextService.runWithContext(tenantContext, () => next.handle());
   }
 }

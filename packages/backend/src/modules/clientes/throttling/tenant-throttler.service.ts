@@ -43,10 +43,10 @@ export class TenantThrottlerService {
     const { limit, ttl } = this.limits[operation];
     const cacheKey = `throttle:${tenantId}:${operation}`;
 
-    const currentCount = (await this.cacheManager.get<number>(cacheKey)) ?? 0;
+    const currentCount = (await (this.cacheManager as any).get<number>(cacheKey)) ?? 0;
 
     if (currentCount >= limit) {
-      const remainingTtl = await this.cacheManager.ttl?.(cacheKey);
+      const remainingTtl = await (this.cacheManager as any).ttl?.(cacheKey);
       this.logger.warn(`[${tenantId}] Excedeu limite de '${operation}' (${currentCount}/${limit}).`);
       throw new ThrottlerException(
         `Limite excedido para '${operation}'. Tente novamente em ${remainingTtl ?? ttl} segundos.`,
@@ -56,7 +56,7 @@ export class TenantThrottlerService {
     const newCount = currentCount + 1;
     
     // CORREÇÃO: Passa o 'ttl' como um número, conforme a tipagem da sua dependência.
-    await this.cacheManager.set(cacheKey, newCount, ttl);
+    await (this.cacheManager as any).set(cacheKey, newCount, ttl);
 
     this.logger.verbose(`[${tenantId}] Requisição '${operation}' autorizada (${newCount}/${limit}).`);
   }

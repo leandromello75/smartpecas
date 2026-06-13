@@ -1,4 +1,4 @@
-import { Injectable, Logger, InternalServerErrorException, Inject } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, Inject } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { PrismaService } from '../../../prisma/prisma.service';
@@ -7,8 +7,7 @@ import { TenantContextService } from '../../../common/tenant-context/tenant-cont
 
 @Injectable()
 export class ClientesStatsService {
-  private readonly _logger = new Logger(ClientesStatsService.name);
-  private readonly CACHE_TTL = 300000; // 5 minutos em MS
+  private readonly CACHE_TTL = 300000;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -18,46 +17,33 @@ export class ClientesStatsService {
 
   async obterEstatisticasResumo(): Promise<EstatisticasResumoDto> {
     const tenantId = this.tenantContext.getTenantId();
-    if (!tenantId) {
-      throw new InternalServerErrorException('Contexto de tenant não encontrado.');
-    }
+    if (!tenantId) throw new InternalServerErrorException('Contexto de tenant não encontrado.');
 
     const cacheKey = `estatisticas:${tenantId}`;
-    const cached = await this.cacheManager.get<EstatisticasResumoDto>(cacheKey);
+    const cached = await (this.cacheManager as any).get(cacheKey) as EstatisticasResumoDto | undefined;
     if (cached) return cached;
 
-    const [
-      totalClientes,
-      clientesAtivos,
-      
-      clientesPF,
-      clientesPJ,
-      clientesUltimos30Dias,
-    ] = await this.prisma.$transaction([
-      this.prisma.cliente.count({ where: { tenantId } }),
-      this.prisma.cliente.count({ where: { tenantId, isAtivo: true } }),
-      this.prisma.cliente.count({ where: { tenantId, tipoCliente: 'PESSOA_FISICA' } }),
-      this.prisma.cliente.count({ where: { tenantId, tipoCliente: 'PESSOA_JURIDICA' } }),
-      this.prisma.cliente.count({
-        where: {
-          tenantId,
-          createdAt: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } // Corrigido para createdAt
-        }
-      }),
-    ]);
+    const [totalClientes, clientesAtivos, clientesPF, clientesPJ, clientesUltimos30Dias] =
+      await this.prisma.$transaction([
+        this.prisma.cliente.count({ where: { tenantId } }),
+        this.prisma.cliente.count({ where: { tenantId, isAtivo: true } }),
+        this.prisma.cliente.count({ where: { tenantId, tipoCliente: 'PESSOA_FISICA' } }),
+        this.prisma.cliente.count({ where: { tenantId, tipoCliente: 'PESSOA_JURIDICA' } }),
+        this.prisma.cliente.count({
+          where: { tenantId, createdAt: { gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000) } },
+        }),
+      ]);
 
     const estatisticas: EstatisticasResumoDto = {
       totalClientes,
       clientesAtivos,
       clientesInativos: totalClientes - clientesAtivos,
-      
       clientesPessoaFisica: clientesPF,
       clientesPessoaJuridica: clientesPJ,
       clientesUltimos30Dias,
-      percentualInadimplencia: totalClientes > 0 ? (clientesInadimplentes / totalClientes) * 100 : 0,
     };
 
-    await this.cacheManager.set(cacheKey, estatisticas, this.CACHE_TTL);
+    await (this.cacheManager as any).set(cacheKey, estatisticas, this.CACHE_TTL);
     return estatisticas;
   }
 }

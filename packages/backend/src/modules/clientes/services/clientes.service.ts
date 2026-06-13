@@ -30,7 +30,7 @@ import { ClienteMapper } from '../mappers/cliente.mapper';
 import { AuditoriaService } from '../auditoria/auditoria.service';
 import { IntegridadeService } from '../validacoes/integridade.service';
 import { IdempotencyService } from '../auditoria/idempotency.service';
-import { Prisma, OperacaoAuditoria, TipoCliente } from '../../prisma/src/generated/prisma-client'; // Importação correta
+import { Prisma, OperacaoAuditoria, TipoCliente } from '@prisma/client'; // Importação correta
 import { TenantContextService } from '../../../common/tenant-context/tenant-context.service';
 
 @Injectable()
@@ -99,7 +99,7 @@ export class ClientesService {
     const tenantId = this.tenantContext.getTenantId();
     
     const cacheKey = `cliente:${tenantId}:${id}`;
-    const cached = await this.cacheManager.get<ClienteResponseDto>(cacheKey);
+    const cached = await (this.cacheManager as any).get<ClienteResponseDto>(cacheKey);
     if (cached) return cached;
 
     const cliente = await this.prisma.cliente.findUnique({
@@ -110,7 +110,7 @@ export class ClientesService {
     if (!cliente) throw new NotFoundException(`Cliente com ID "${id}" não encontrado.`);
     
     const response = ClienteMapper.toResponse(cliente);
-    await this.cacheManager.set(cacheKey, response, this.CACHE_TTL);
+    await (this.cacheManager as any).set(cacheKey, response, this.CACHE_TTL);
     return response;
   }
 
@@ -127,9 +127,9 @@ export class ClientesService {
     const [clientes, total] = await this.prisma.$transaction([
         this.prisma.cliente.findMany({
           where,
-          skip: (filtros.page - 1) * filtros.limit,
+          skip: ((filtros.page ?? 1) - 1) * (filtros.limit ?? 20),
           take: filtros.limit,
-          orderBy: { [filtros.sortBy]: filtros.sortOrder.toLowerCase() as Prisma.SortOrder },
+          orderBy: { [(filtros.sortBy ?? "nome")]: (filtros.sortOrder ?? "asc").toLowerCase() as Prisma.SortOrder },
           include: { enderecos: { where: { isPrincipal: true }, take: 1 } },
         }),
         this.prisma.cliente.count({ where }),
@@ -137,7 +137,7 @@ export class ClientesService {
 
     return {
       dados: clientes.map(ClienteMapper.toResponse),
-      paginacao: { total, pagina: filtros.page, itensPorPagina: filtros.limit, totalPaginas: Math.ceil(total / filtros.limit) },
+      paginacao: { total, pagina: filtros.page, itensPorPagina: filtros.limit ?? 20, totalPaginas: Math.ceil(total / (filtros.limit ?? 20)) },
     };
   }
   
@@ -160,7 +160,7 @@ export class ClientesService {
             data: {
               ...dto,
               documento: documentoLimpo,
-              atualizadoPor: usuario.sub,
+              // atualizadoPor removido - campo não existe no schema
               atualizadoPorNome: usuario.name,
               atualizadoPorIp: usuario.ip,
               versao: { increment: 1 },
@@ -223,8 +223,6 @@ export class ClientesService {
     if (filtros.tipoCliente) {
       where.tipoCliente = filtros.tipoCliente;
     }
-    if (filtros.isInadimplente !== undefined) {
-      where.isInadimplente = filtros.isInadimplente;
     }
     if (filtros.nome) {
       where.OR = [
@@ -270,7 +268,7 @@ export class ClientesService {
     this.logger.debug(`Invalidando caches com os padrões: ${patterns.join(', ')}`);
     for (const pattern of patterns) {
         try {
-            const store = (this.cacheManager.store as any);
+            const store = ((this.cacheManager as any).store as any);
             // A API de cache-manager pode variar. A forma mais segura é deletar por chave.
             // A busca por padrão (keys) é ineficiente e muitas vezes não recomendada em produção.
             // Para este exemplo, vamos manter a lógica, mas cientes da limitação.

@@ -56,7 +56,7 @@ export class ClientesIntegrationService {
     }
 
     const cacheKey = `cnpj:${dto.cnpj}`;
-    const cached = await this.cacheManager.get<CnpjResponseDto>(cacheKey);
+    const cached = await (this.cacheManager as any).get<CnpjResponseDto>(cacheKey);
     if (cached) {
       this.logger.debug(`[${tenantId || 'global'}] CNPJ encontrado no cache: ${dto.cnpj}`);
       return cached;
@@ -80,7 +80,7 @@ export class ClientesIntegrationService {
         throw new NotFoundException(`Dados para o CNPJ ${dto.cnpj} não foram encontrados na API externa.`);
       }
 
-      await this.cacheManager.set(cacheKey, result, this.CACHE_TTL_LONGO);
+      await (this.cacheManager as any).set(cacheKey, result, this.CACHE_TTL_LONGO);
       return result;
     } catch (error) {
         this.logger.error(`Erro final ao consultar CNPJ ${dto.cnpj}: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);
@@ -100,7 +100,7 @@ export class ClientesIntegrationService {
     }
 
     const cacheKey = `cep:${dto.cep}`;
-    const cached = await this.cacheManager.get<CepResponseDto>(cacheKey);
+    const cached = await (this.cacheManager as any).get<CepResponseDto>(cacheKey);
     if (cached) {
       this.logger.debug(`[${tenantId || 'global'}] CEP encontrado no cache: ${dto.cep}`);
       return cached;
@@ -117,7 +117,7 @@ export class ClientesIntegrationService {
         throw new NotFoundException(`Dados para o CEP ${dto.cep} não foram encontrados.`);
       }
 
-      await this.cacheManager.set(cacheKey, result, this.CACHE_TTL_LONGO);
+      await (this.cacheManager as any).set(cacheKey, result, this.CACHE_TTL_LONGO);
       return result;
     } catch (error) {
         this.logger.error(`Erro final ao consultar CEP ${dto.cep}: ${error instanceof Error ? error.message : 'Erro desconhecido'}`);

@@ -30,7 +30,7 @@ import {
 import { TenantService } from './tenant.service';
 import { CreateTenantDto } from './dto/create-tenant.dto';
 // ✅ CORREÇÃO: Tenant vem do cliente público
-import { Tenant } from '../../prisma/src/generated/prisma-client';
+import { Tenant } from '@prisma/client';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @ApiTags('Tenants')

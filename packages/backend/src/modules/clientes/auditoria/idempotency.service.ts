@@ -17,7 +17,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
-import { Prisma } from '../../prisma/src/generated/prisma-client'; // Importar 'Prisma' para tipagem de transação
+import { Prisma } from '@prisma/client'; // Importar 'Prisma' para tipagem de transação
 
 @Injectable()
 export class IdempotencyService {

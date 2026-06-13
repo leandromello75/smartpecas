@@ -14,7 +14,7 @@
 
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { cpf, cnpj } from 'cpf-cnpj-validator';
-import { TipoCliente } from '../../prisma/src/generated/prisma-client';
+import { TipoCliente } from '@prisma/client';
 @Injectable()
 export class DocumentoValidatorService {
   /**

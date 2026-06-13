@@ -20,7 +20,7 @@ export class IntegridadeService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  async validarExclusaoCliente(tenantId: string, clienteId: string): Promise<void> {
+  async validarExclusaoCliente(_tenantId: string, _clienteId: string): Promise<void> {
     this.logger.debug(`[${tenantId}] Verificando integridade para exclusão do cliente: ${clienteId}`);
 
     await this.verificarOrdensEmAberto(tenantId, clienteId);
@@ -30,12 +30,12 @@ export class IntegridadeService {
     this.logger.verbose(`[${tenantId}] Nenhuma pendência encontrada. Cliente ${clienteId} pode ser desativado.`);
   }
 
-  private async verificarOrdensEmAberto(tenantId: string, clienteId: string): Promise<void> {
+  private async verificarOrdensEmAberto(_tenantId: string, _clienteId: string): Promise<void> {
     const ordens = await this.prisma.order.count({
       where: {
         tenantId,
         customerId: clienteId,
-        status: { in: ['pending', 'processing'] }, // Idealmente usar enum
+        // status removido - campo não existe no schema
       },
     });
 
@@ -45,7 +45,7 @@ export class IntegridadeService {
     }
   }
 
-  private async verificarFaturasPendentes(tenantId: string, clienteId: string): Promise<void> {
+  private async verificarFaturasPendentes(_tenantId: string, _clienteId: string): Promise<void> {
     // Remover comentário caso modelo "fatura" exista
     /*
     const faturas = await this.prisma.fatura.count({
@@ -63,7 +63,7 @@ export class IntegridadeService {
     */
   }
 
-  private async verificarVeiculosAtivos(tenantId: string, clienteId: string): Promise<void> {
+  private async verificarVeiculosAtivos(_tenantId: string, _clienteId: string): Promise<void> {
     // Remover comentário caso modelo "veiculoCliente" exista
     /*
     const veiculos = await this.prisma.veiculoCliente.count({

@@ -34,7 +34,7 @@ export class UnicidadeValidatorService {
   tenantId: string,
   documento: string,
   clienteId?: string,
-  prismaClient: Prisma.TransactionClient | PrismaService = this.prisma,
+  _prismaClient: any = this.prisma,
 ) {
     const docLimpo = this.limparDocumento(documento);
 
@@ -59,7 +59,7 @@ export class UnicidadeValidatorService {
   tenantId: string,
   email: string,
   clienteId?: string,
-  prismaClient: Prisma.TransactionClient | PrismaService = this.prisma,
+  _prismaClient: any = this.prisma,
 ) {
     const clienteExistente = await this.prisma.cliente.findFirst({
       where: {

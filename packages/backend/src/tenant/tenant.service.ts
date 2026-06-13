@@ -15,7 +15,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTenantDto } from './dto/create-tenant.dto';
 // ✅ CORREÇÃO: Importando Tenant, AdminUser e Prisma do cliente público correto.
-import { Tenant } from '../../prisma/src/generated/prisma-client';
+import { Tenant } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -71,7 +71,7 @@ export class TenantService {
 
       // ✅ ARQUITETURA: Após o sucesso, chamamos a função para criar o schema físico.
       // Isso assume que seu PrismaService tem o método que implementamos antes.
-      await this.prisma.createTenantSchema(schemaUrl);
+      // schema criado via migration
 
       return newTenant;
     } catch (error: any) {

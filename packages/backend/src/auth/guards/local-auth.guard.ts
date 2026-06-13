@@ -18,7 +18,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { AdminUser } from '../../prisma/src/generated/prisma-client'; // Importar o tipo AdminUser
+import { AdminUser } from '@prisma/client'; // Importar o tipo AdminUser
 
 @Injectable()
 export class LocalAuthGuard extends AuthGuard('local-admin') {
