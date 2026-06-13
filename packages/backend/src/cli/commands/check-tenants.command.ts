@@ -13,7 +13,7 @@
 import { Command, CommandRunner } from 'nest-commander';
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-//import { Tenant } from '@prisma/client'; // Importar o modelo Tenant
+//import { Tenant } from '../../prisma/src/generated/prisma-client'; // Importar o modelo Tenant
 
 // NOVO: Definir uma interface para o tipo de Tenant retornado pela query 'select'
 interface TenantSubset {

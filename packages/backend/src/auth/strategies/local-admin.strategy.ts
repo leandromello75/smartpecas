@@ -15,7 +15,7 @@ import { Strategy } from 'passport-local';
 import { PassportStrategy } from '@nestjs/passport';
 import { Injectable, UnauthorizedException, Logger } from '@nestjs/common';
 import { AuthService } from '../auth.service'; // Importar o AuthService
-import { AdminUser } from '@prisma/client'; // Importar o tipo AdminUser
+import { AdminUser } from '../../prisma/src/generated/prisma-client'; // Importar o tipo AdminUser
 
 @Injectable()
 export class LocalAdminStrategy extends PassportStrategy(Strategy, 'local-admin') {

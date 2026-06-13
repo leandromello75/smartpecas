@@ -14,7 +14,7 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 // ✅ CORREÇÃO: A importação agora usa o caminho relativo direto para o cliente gerado,
 // o que é mais robusto do que depender de um path alias.
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from '../../prisma/src/generated/prisma-client';
 
 @Injectable()
 // A classe agora estende o PrismaClient importado corretamente

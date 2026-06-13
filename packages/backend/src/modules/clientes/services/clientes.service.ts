@@ -17,7 +17,7 @@ import {
   Logger,
   NotFoundException,
   BadRequestException,
-  InternalServerErrorException,
+  // InternalServerErrorException,
   Inject,
 } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
@@ -30,7 +30,7 @@ import { ClienteMapper } from '../mappers/cliente.mapper';
 import { AuditoriaService } from '../auditoria/auditoria.service';
 import { IntegridadeService } from '../validacoes/integridade.service';
 import { IdempotencyService } from '../auditoria/idempotency.service';
-import { Prisma, OperacaoAuditoria, TipoCliente } from '@prisma/client'; // Importação correta
+import { Prisma, OperacaoAuditoria, TipoCliente } from '../../prisma/src/generated/prisma-client'; // Importação correta
 import { TenantContextService } from '../../../common/tenant-context/tenant-context.service';
 
 @Injectable()

@@ -15,7 +15,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { JwtTenantUserPayload, JwtAdminPayload } from '../../../shared/interfaces/jwt-payload.interface';
 // CORREÇÃO: Importar AuditoriaLog e OperacaoAuditoria do Prisma Client unificado
-import { AuditoriaLog, OperacaoAuditoria } from '@prisma/client'; // Caminho corrigido
+// Tipos de auditoria definidos localmente
 
 // NOVO: Tipo union para 'usuario' se ele pode ser Admin ou TenantUser
 type AuditUserPayload = JwtTenantUserPayload | JwtAdminPayload;

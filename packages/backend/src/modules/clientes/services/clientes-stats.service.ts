@@ -7,7 +7,7 @@ import { TenantContextService } from '../../../common/tenant-context/tenant-cont
 
 @Injectable()
 export class ClientesStatsService {
-  private readonly logger = new Logger(ClientesStatsService.name);
+  private readonly _logger = new Logger(ClientesStatsService.name);
   private readonly CACHE_TTL = 300000; // 5 minutos em MS
 
   constructor(
@@ -29,14 +29,13 @@ export class ClientesStatsService {
     const [
       totalClientes,
       clientesAtivos,
-      clientesInadimplentes,
+      
       clientesPF,
       clientesPJ,
       clientesUltimos30Dias,
     ] = await this.prisma.$transaction([
       this.prisma.cliente.count({ where: { tenantId } }),
       this.prisma.cliente.count({ where: { tenantId, isAtivo: true } }),
-      this.prisma.cliente.count({ where: { tenantId, isInadimplente: true } }),
       this.prisma.cliente.count({ where: { tenantId, tipoCliente: 'PESSOA_FISICA' } }),
       this.prisma.cliente.count({ where: { tenantId, tipoCliente: 'PESSOA_JURIDICA' } }),
       this.prisma.cliente.count({
@@ -51,7 +50,7 @@ export class ClientesStatsService {
       totalClientes,
       clientesAtivos,
       clientesInativos: totalClientes - clientesAtivos,
-      clientesInadimplentes,
+      
       clientesPessoaFisica: clientesPF,
       clientesPessoaJuridica: clientesPJ,
       clientesUltimos30Dias,

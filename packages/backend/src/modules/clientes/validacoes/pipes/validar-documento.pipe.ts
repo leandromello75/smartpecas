@@ -1,7 +1,7 @@
 // backend/src/modules/clientes/validacoes/pipes/validar-documento.pipe.ts
 // Versão: 1.0.0
 import { PipeTransform, Injectable, BadRequestException } from '@nestjs/common';
-import { isCPF, isCNPJ } from 'brazilian-documents'; // Ou 'cpf-cnpj-validator'
+import { cpf.isValid, cnpj.isValid } import { cpf, cnpj } from 'cpf-cnpj-validator'; // Ou 'cpf-cnpj-validator'
 
 @Injectable()
 export class ValidarDocumentoPipe implements PipeTransform {
@@ -13,7 +13,7 @@ export class ValidarDocumentoPipe implements PipeTransform {
     // Adapte para a biblioteca que você está usando (cpf-cnpj-validator)
     // Ex: if (!cpf.isValid(documentoLimpo) && !cnpj.isValid(documentoLimpo)) {
     // ou use a lógica do seu DocumentoValidatorService
-    if (!isCPF(documentoLimpo) && !isCNPJ(documentoLimpo)) { // Exemplo com brazilian-documents
+    if (!cpf.isValid(documentoLimpo) && !cnpj.isValid(documentoLimpo)) { // Exemplo com brazilian-documents
       throw new BadRequestException('Formato de CPF ou CNPJ inválido.');
     }
     return documentoLimpo;

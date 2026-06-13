@@ -51,7 +51,7 @@ import * as Joi from 'joi'; // Para validação de variáveis de ambiente
         return {
           secret,
           signOptions: {
-            expiresIn: configService.get<string>('JWT_EXPIRES_IN') || '60m',
+            expiresIn: (configService.get<string>('JWT_EXPIRES_IN') || '60m') as any,
             algorithm: 'HS256', // Sugestão da equipe: Algoritmo de assinatura
           },
           verifyOptions: {

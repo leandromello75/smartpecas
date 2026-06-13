@@ -21,7 +21,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
-import { AdminUser, Role } from '@prisma/client'; 
+import { AdminUser, Role } from '../../prisma/src/generated/prisma-client'; 
 import { JwtAdminPayload } from '../shared/interfaces/jwt-payload.interface'; 
 import { LoginRateLimiterService } from './login-rate-limiter.service'; 
 

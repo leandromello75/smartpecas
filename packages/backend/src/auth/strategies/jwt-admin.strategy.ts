@@ -21,7 +21,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../../prisma/prisma.service';
-import { AdminUser, Role } from '@prisma/client';
+import { AdminUser, Role } from '../../prisma/src/generated/prisma-client';
 import { JwtAdminPayload } from '../../shared/interfaces/jwt-payload.interface';
 
 // Interface segura para retornar ao contexto da requisição
