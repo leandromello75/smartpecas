@@ -1,8 +1,7 @@
 import {
   Injectable, Logger, NotFoundException, BadRequestException, Inject,
 } from '@nestjs/common';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
+import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { CreateClienteDto, UpdateClienteDto, ConsultarClienteDto, ClienteResponseDto, TipoCliente } from '../dto/cliente.dto';
 import { DocumentoValidatorService } from '../validacoes/documento-validator.service';
