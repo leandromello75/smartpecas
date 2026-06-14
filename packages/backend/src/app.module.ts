@@ -21,6 +21,7 @@ import { envValidationSchema } from './config/env.validation';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { ClientesModule } from './modules/clientes/clientes.module';
+import { HealthModule } from './health/health.module';
 import { LoggingInterceptor } from './shared/interceptors/logging.interceptor';
 import { TransformInterceptor } from './shared/interceptors/transform.interceptor';
 import { TenantInterceptor } from './common/interceptors/tenant.interceptor';
@@ -51,6 +52,7 @@ import { TenantInterceptor } from './common/interceptors/tenant.interceptor';
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 20 }]),
 
     // Módulos de domínio
+    HealthModule,
     PrismaModule,
     AuthModule,
     ClientesModule,
