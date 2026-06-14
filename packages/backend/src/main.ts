@@ -17,9 +17,10 @@ import compression from 'compression';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
-  const logger = new Logger('Bootstrap');
-  const port = process.env.PORT || 3000;
+  try {
+    const app = await NestFactory.create(AppModule);
+    const logger = new Logger('Bootstrap');
+    const port = process.env.PORT || 3000;
 
   // ======================================================
   // === Middlewares Globais de Segurança e Performance ===
@@ -72,9 +73,15 @@ async function bootstrap() {
   }
 
   // Inicia o servidor
-  await app.listen(port);
-  logger.log(`🚀 SmartPeças ERP rodando na porta: ${port}`);
-  logger.log(`💡 Ambiente: ${process.env.NODE_ENV}`);
+  await app.listen(port, '0.0.0.0');
+    logger.log(`🚀 SmartPeças ERP rodando na porta: ${port}`);
+    logger.log(`💡 Ambiente: ${process.env.NODE_ENV || 'production'}`);
+
+  } catch (error) {
+    const logger = new Logger('Bootstrap');
+    logger.error('❌ Erro fatal ao iniciar a aplicação:', error);
+    process.exit(1); // Força o container a falhar visivelmente
+  }
 }
 
 bootstrap();

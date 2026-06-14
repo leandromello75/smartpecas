@@ -1,15 +1,17 @@
 {
   "compilerOptions": {
-    "module": "commonjs",
-    "target": "ES2021",
+    "module": "Node16",
+    "target": "ES2022",
     "declaration": true,
     "removeComments": true,
     "sourceMap": true,
     "outDir": "./dist",
     "rootDir": "./src",
-    "baseUrl": "./",
+
     "incremental": true,
     "skipLibCheck": true,
+
+    /* Strictness */
     "strictNullChecks": true,
     "noImplicitAny": true,
     "strictFunctionTypes": true,
@@ -18,35 +20,39 @@
     "noImplicitThis": true,
     "useUnknownInCatchVariables": true,
     "alwaysStrict": true,
+
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "exactOptionalPropertyTypes": false,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedIndexedAccess": false,
     "noImplicitOverride": true,
+
+    "exactOptionalPropertyTypes": false,
+    "noUncheckedIndexedAccess": false,
     "noPropertyAccessFromIndexSignature": false,
     "useDefineForClassFields": false,
 
     /* Module Resolution */
-    "moduleResolution": "node",
+    "moduleResolution": "Node16",
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
-    "isolatedModules": false,
+    "isolatedModules": true,
 
-    /* Decorators */
+    /* Decorators (NestJS) */
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
 
-    /* Path Aliases (Simplificados para a nova estrutura) */
+    /* Path Aliases */
+    "baseUrl": "./",
     "paths": {
-      "@/": ["."], 
       "@/*": ["src/*"],
+      "@/": ["./"],
       "@prisma/client": ["prisma/src/generated/prisma-client"]
     }
   },
-   "lib": ["es2021", "dom"],
+
+  "lib": ["ES2022"],
   "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+  "exclude": ["node_modules", "dist", "**/*.spec.ts", "**/*.test.ts"]
 }

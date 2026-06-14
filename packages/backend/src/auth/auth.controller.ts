@@ -24,8 +24,9 @@ import {
 import { AuthService } from './auth.service';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { LoginAdminDto } from './dto/login-admin.dto';
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import { LoginRateLimiterService } from './login-rate-limiter.service';
+
 
 @ApiTags('Autenticação')
 @Controller('auth')
