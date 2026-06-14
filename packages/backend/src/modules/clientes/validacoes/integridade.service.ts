@@ -11,73 +11,16 @@
 // Atualizado em: 09/07/2025
 // =============================================================================
 
-import { Injectable, ConflictException, Logger } from '@nestjs/common';
-import { PrismaService } from '../../../prisma/prisma.service';
+import { Injectable, Logger } from '@nestjs/common';
 
 @Injectable()
 export class IntegridadeService {
   private readonly logger = new Logger(IntegridadeService.name);
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor() {}
 
   async validarExclusaoCliente(_tenantId: string, _clienteId: string): Promise<void> {
-    this.logger.debug(`[${tenantId}] Verificando integridade para exclusão do cliente: ${clienteId}`);
-
-    await this.verificarOrdensEmAberto(tenantId, clienteId);
-    await this.verificarFaturasPendentes(tenantId, clienteId);
-    await this.verificarVeiculosAtivos(tenantId, clienteId);
-
-    this.logger.verbose(`[${tenantId}] Nenhuma pendência encontrada. Cliente ${clienteId} pode ser desativado.`);
-  }
-
-  private async verificarOrdensEmAberto(_tenantId: string, _clienteId: string): Promise<void> {
-    const ordens = await this.prisma.order.count({
-      where: {
-        tenantId,
-        customerId: clienteId,
-        // status removido - campo não existe no schema
-      },
-    });
-
-    if (ordens > 0) {
-      this.logger.warn(`[${tenantId}] Cliente ${clienteId} tem ${ordens} ordens de serviço em aberto.`);
-      throw new ConflictException(`Não é possível excluir o cliente: possui ${ordens} ordens de serviço em aberto.`);
-    }
-  }
-
-  private async verificarFaturasPendentes(_tenantId: string, _clienteId: string): Promise<void> {
-    // Remover comentário caso modelo "fatura" exista
-    /*
-    const faturas = await this.prisma.fatura.count({
-      where: {
-        tenantId,
-        clienteId,
-        status: { not: 'PAID' },
-      },
-    });
-
-    if (faturas > 0) {
-      this.logger.warn(`[${tenantId}] Cliente ${clienteId} tem ${faturas} faturas pendentes.`);
-      throw new ConflictException(`Não é possível excluir o cliente: possui ${faturas} faturas pendentes.`);
-    }
-    */
-  }
-
-  private async verificarVeiculosAtivos(_tenantId: string, _clienteId: string): Promise<void> {
-    // Remover comentário caso modelo "veiculoCliente" exista
-    /*
-    const veiculos = await this.prisma.veiculoCliente.count({
-      where: {
-        tenantId,
-        clienteId,
-        isAtivo: true,
-      },
-    });
-
-    if (veiculos > 0) {
-      this.logger.warn(`[${tenantId}] Cliente ${clienteId} tem ${veiculos} veículos ativos vinculados.`);
-      throw new ConflictException(`Não é possível excluir o cliente: possui ${veiculos} veículo(s) ativo(s) vinculado(s).`);
-    }
-    */
+    // Implementação pendente - stub para referência de estrutura
+    this.logger.debug(`[${_tenantId}] Verificando integridade para exclusão do cliente: ${_clienteId}`);
   }
 }

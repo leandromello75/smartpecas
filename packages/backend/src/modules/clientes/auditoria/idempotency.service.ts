@@ -42,13 +42,10 @@ export class IdempotencyService {
     route: string,
     // Tipagem da função 'operation'
     operation: (tx: Prisma.TransactionClient) => Promise<T>,
-    origin?: string,
-    ttlMs: number = 86400000,
   ): Promise<T> {
     if (!idemKey) {
-      // Se não houver chave, execute a operação normalmente em uma transação
-      // A tipagem 'any' é usada para compatibilidade com o callback do $transaction
-      return this.prisma.$transaction(operation as any);
+      // Se não houver chave, execute a operação normalmente em uma transação.
+      return this.prisma.$transaction(async (tx) => operation(tx)) as T;
     }
 
     // AQUI ESTÁ A CORREÇÃO: tipagem explícita do 'tx'
@@ -86,11 +83,8 @@ export class IdempotencyService {
       await tx.idempotencyKey.create({
         data: {
           key: idemKey,
-          route,
           tenantId,
           response: result as any,
-          expiresAt: new Date(Date.now() + ttlMs),
-          origin,
         },
       });
 

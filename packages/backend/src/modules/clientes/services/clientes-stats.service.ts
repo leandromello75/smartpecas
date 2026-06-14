@@ -1,6 +1,5 @@
 import { Injectable, InternalServerErrorException, Inject } from '@nestjs/common';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
+import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { EstatisticasResumoDto } from '../dto/cliente.dto';
 import { TenantContextService } from '../../../common/tenant-context/tenant-context.service';
@@ -20,7 +19,7 @@ export class ClientesStatsService {
     if (!tenantId) throw new InternalServerErrorException('Contexto de tenant não encontrado.');
 
     const cacheKey = `estatisticas:${tenantId}`;
-    const cached = await (this.cacheManager as any).get(cacheKey) as EstatisticasResumoDto | undefined;
+    const cached = await this.cacheManager.get(cacheKey) as EstatisticasResumoDto | undefined;
     if (cached) return cached;
 
     const [totalClientes, clientesAtivos, clientesPF, clientesPJ, clientesUltimos30Dias] =
