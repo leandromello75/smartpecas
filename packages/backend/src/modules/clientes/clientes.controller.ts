@@ -19,11 +19,16 @@ import {
 import { ApiBearerAuth, ApiHeader, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
   ClienteResponseDto,
+  ConsultarCepDto,
   ConsultarClienteDto,
   ConsultarCnpjDto,
   CreateClienteDto,
+  CreateContatoDto,
+  CreateEnderecoDto,
   EstatisticasResumoDto,
   UpdateClienteDto,
+  UpdateContatoDto,
+  UpdateEnderecoDto,
 } from './dto/cliente.dto';
 import { ClientesService } from './services/clientes.service';
 import { ClientesIntegrationService } from './services/clientes-integration.service';
@@ -84,7 +89,7 @@ export class ClientesController {
 
   @Put(':id')
   @Roles('admin', 'manager', 'sales')
-  @ApiOperation({ summary: 'Atualiza um cliente existente.' })
+  @ApiOperation({ summary: 'Atualiza dados cadastrais de um cliente.' })
   @ApiResponse({ status: 200, type: ClienteResponseDto })
   async atualizar(
     @Param('id', ParseUUIDPipe) id: string,
@@ -120,11 +125,99 @@ export class ClientesController {
     return this.clientesService.remover(id);
   }
 
+  @Post(':id/enderecos')
+  @Roles('admin', 'manager', 'sales')
+  @ApiOperation({ summary: 'Adiciona um endereco ao cliente.' })
+  @ApiResponse({ status: 201, type: ClienteResponseDto })
+  async adicionarEndereco(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body(ValidationPipe) dto: CreateEnderecoDto,
+  ): Promise<ClienteResponseDto> {
+    return this.clientesService.adicionarEndereco(id, dto);
+  }
+
+  @Put(':id/enderecos/:enderecoId')
+  @Roles('admin', 'manager', 'sales')
+  @ApiOperation({ summary: 'Atualiza um endereco do cliente.' })
+  @ApiResponse({ status: 200, type: ClienteResponseDto })
+  async atualizarEndereco(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('enderecoId', ParseUUIDPipe) enderecoId: string,
+    @Body(ValidationPipe) dto: UpdateEnderecoDto,
+  ): Promise<ClienteResponseDto> {
+    return this.clientesService.atualizarEndereco(id, enderecoId, dto);
+  }
+
+  @Patch(':id/enderecos/:enderecoId/principal')
+  @Roles('admin', 'manager', 'sales')
+  @ApiOperation({ summary: 'Define um endereco como principal.' })
+  @ApiResponse({ status: 200, type: ClienteResponseDto })
+  async definirEnderecoPrincipal(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('enderecoId', ParseUUIDPipe) enderecoId: string,
+  ): Promise<ClienteResponseDto> {
+    return this.clientesService.definirEnderecoPrincipal(id, enderecoId);
+  }
+
+  @Delete(':id/enderecos/:enderecoId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Roles('admin', 'manager')
+  @ApiOperation({ summary: 'Remove um endereco do cliente.' })
+  @ApiResponse({ status: 204, description: 'Endereco removido com sucesso.' })
+  async removerEndereco(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('enderecoId', ParseUUIDPipe) enderecoId: string,
+  ): Promise<void> {
+    return this.clientesService.removerEndereco(id, enderecoId);
+  }
+
+  @Post(':id/contatos')
+  @Roles('admin', 'manager', 'sales')
+  @ApiOperation({ summary: 'Adiciona um contato ao cliente.' })
+  @ApiResponse({ status: 201, type: ClienteResponseDto })
+  async adicionarContato(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body(ValidationPipe) dto: CreateContatoDto,
+  ): Promise<ClienteResponseDto> {
+    return this.clientesService.adicionarContato(id, dto);
+  }
+
+  @Put(':id/contatos/:contatoId')
+  @Roles('admin', 'manager', 'sales')
+  @ApiOperation({ summary: 'Atualiza um contato do cliente.' })
+  @ApiResponse({ status: 200, type: ClienteResponseDto })
+  async atualizarContato(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('contatoId', ParseUUIDPipe) contatoId: string,
+    @Body(ValidationPipe) dto: UpdateContatoDto,
+  ): Promise<ClienteResponseDto> {
+    return this.clientesService.atualizarContato(id, contatoId, dto);
+  }
+
+  @Delete(':id/contatos/:contatoId')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @Roles('admin', 'manager')
+  @ApiOperation({ summary: 'Remove um contato do cliente.' })
+  @ApiResponse({ status: 204, description: 'Contato removido com sucesso.' })
+  async removerContato(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Param('contatoId', ParseUUIDPipe) contatoId: string,
+  ): Promise<void> {
+    return this.clientesService.removerContato(id, contatoId);
+  }
+
   @Post('integracao/consultar-cnpj')
   @Roles('admin', 'manager', 'sales')
   @ApiOperation({ summary: 'Consulta dados de um CNPJ.' })
   async consultarCnpj(@Body(ValidationPipe) dto: ConsultarCnpjDto) {
     return this.integrationService.consultarCnpj(dto);
+  }
+
+  @Post('integracao/consultar-cep')
+  @Roles('admin', 'manager', 'sales')
+  @ApiOperation({ summary: 'Consulta dados de um CEP.' })
+  async consultarCep(@Body(ValidationPipe) dto: ConsultarCepDto) {
+    return this.integrationService.consultarCep(dto);
   }
 
   @Post('integracao/criar-com-cnpj')
