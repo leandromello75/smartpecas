@@ -8,7 +8,7 @@
     "outDir": "./dist",
     "rootDir": "./src",
 
-    "incremental": true,
+    "incremental": false,
     "skipLibCheck": true,
 
     /* Strictness */
@@ -47,8 +47,7 @@
     "baseUrl": "./",
     "paths": {
       "@/*": ["src/*"],
-      "@/": ["./"],
-      "@prisma/client": ["prisma/src/generated/prisma-client"]
+      "@/": ["./"]
     }
   },
 

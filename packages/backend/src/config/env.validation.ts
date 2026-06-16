@@ -27,4 +27,8 @@ export const envValidationSchema = Joi.object({
   JWT_EXPIRES_IN: Joi.string().pattern(/^(\d+)(s|m|h|d)$/).default('3600s'),
 
   FRONTEND_URL: Joi.string().uri().optional(),
+
+  REDIS_HOST: Joi.string().optional(),
+  REDIS_PORT: Joi.number().port().optional(),
+  CACHE_TTL: Joi.number().integer().positive().default(300),
 });

@@ -16,7 +16,7 @@
 
 [deploy]
   # Comando de inicialização — aponta para o build do NestJS
-  startCommand        = "node packages/backend/dist/main"
+  startCommand        = "node dist/main"
 
   # Rota que o Railway usa para verificar se o serviço está saudável
   # Certifique-se de que existe um endpoint GET /health no NestJS

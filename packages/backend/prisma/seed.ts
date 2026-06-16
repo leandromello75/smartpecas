@@ -9,8 +9,8 @@
 // Criado em: 10/07/2025
 // =============================================================================
 
-import { PrismaClient } from './../backend/src/generated/prisma-client'; // Importe o PrismaClient gerado
-import * as bcrypt from 'bcrypt'; // npm install bcrypt
+import { PrismaClient } from '@prisma/client';
+import * as bcrypt from 'bcryptjs';
 
 const prisma = new PrismaClient();
 

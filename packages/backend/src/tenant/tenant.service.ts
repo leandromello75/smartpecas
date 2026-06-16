@@ -16,7 +16,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreateTenantDto } from './dto/create-tenant.dto';
 // ✅ CORREÇÃO: Importando Tenant, AdminUser e Prisma do cliente público correto.
 import { Tenant } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from 'bcryptjs';
 
 @Injectable()
 export class TenantService {

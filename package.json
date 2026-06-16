@@ -8,8 +8,9 @@
   "scripts": {
     "build:backend": "npm run build --workspace=backend",
     "start:backend": "npm run start:dev --workspace=backend",
-    "prisma:generate": "prisma generate",
-    "prisma:migrate": "prisma migrate dev"
+    "prisma:generate": "npm run prisma:generate --workspace=backend",
+    "prisma:migrate": "npm run prisma:migrate --workspace=backend",
+    "prisma:deploy": "npm run prisma:deploy --workspace=backend"
   },
   "devDependencies": {
     "prisma": "^5.15.0",
