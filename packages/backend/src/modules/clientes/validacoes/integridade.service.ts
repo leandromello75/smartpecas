@@ -1,26 +1,26 @@
-// =============================================================================
-// SmartPeças ERP - Serviço de Validação de Integridade
-// =============================================================================
-// Arquivo: backend/src/modules/clientes/validacoes/integridade.service.ts
-//
-// Descrição: Serviço para validar a integridade referencial antes de operações
-// de desativação ou exclusão de clientes, prevenindo inconsistências de dados.
-//
-// Versão: 1.1.0
-// Equipe SmartPeças + Refatoração IA
-// Atualizado em: 09/07/2025
-// =============================================================================
-
-import { Injectable, Logger } from '@nestjs/common';
+import { ConflictException, Injectable, Logger } from '@nestjs/common';
+import { PrismaService } from '../../../prisma/prisma.service';
 
 @Injectable()
 export class IntegridadeService {
   private readonly logger = new Logger(IntegridadeService.name);
 
-  constructor() {}
+  constructor(private readonly prisma: PrismaService) {}
 
-  async validarExclusaoCliente(_tenantId: string, _clienteId: string): Promise<void> {
-    // Implementação pendente - stub para referência de estrutura
-    this.logger.debug(`[${_tenantId}] Verificando integridade para exclusão do cliente: ${_clienteId}`);
+  async validarExclusaoCliente(tenantId: string, clienteId: string): Promise<void> {
+    this.logger.debug(`[${tenantId}] Verificando integridade para exclusao do cliente: ${clienteId}`);
+
+    const pedidosVinculados = await this.prisma.order.count({
+      where: {
+        tenantId,
+        customerId: clienteId,
+      },
+    });
+
+    if (pedidosVinculados > 0) {
+      throw new ConflictException(
+        `Cliente possui ${pedidosVinculados} pedido(s) vinculado(s) e nao pode ser removido. Use desativacao.`,
+      );
+    }
   }
 }

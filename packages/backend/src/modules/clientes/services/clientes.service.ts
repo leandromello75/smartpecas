@@ -160,7 +160,6 @@ export class ClientesService {
   async desativar(id: string): Promise<void> {
     const tenantId = this.tenantContext.getTenantId();
     const usuario = this.tenantContext.getUser();
-    await this.integridadeService.validarExclusaoCliente(tenantId, id);
 
     const result = await this.prisma.cliente.updateMany({
       where: { id, tenantId },
@@ -172,6 +171,31 @@ export class ClientesService {
     await this.auditoriaService.registrarOperacao(tenantId, usuario, {
       operacao: OperacaoAuditoria.DESATIVAR, recurso: 'cliente', recursoId: id,
       dadosAtuais: { isAtivo: false },
+    });
+    await this.invalidarCacheIndividual(tenantId, id);
+  }
+
+  async remover(id: string): Promise<void> {
+    const tenantId = this.tenantContext.getTenantId();
+    const usuario = this.tenantContext.getUser();
+
+    await this.integridadeService.validarExclusaoCliente(tenantId, id);
+
+    const clienteAnterior = await this.prisma.cliente.findFirst({
+      where: { id, tenantId },
+      include: { enderecos: true, contatos: true },
+    });
+
+    if (!clienteAnterior) throw new NotFoundException(`Cliente "${id}" nao encontrado.`);
+
+    await this.prisma.$transaction(async (tx) => {
+      const result = await tx.cliente.deleteMany({ where: { id, tenantId } });
+      if (result.count === 0) throw new NotFoundException(`Cliente "${id}" nao encontrado.`);
+    });
+
+    await this.auditoriaService.registrarOperacao(tenantId, usuario, {
+      operacao: OperacaoAuditoria.EXCLUIR, recurso: 'cliente', recursoId: id,
+      dadosAnteriores: ClienteMapper.toResponse(clienteAnterior),
     });
     await this.invalidarCacheIndividual(tenantId, id);
   }
