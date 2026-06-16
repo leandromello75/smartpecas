@@ -1,16 +1,3 @@
-# =============================================================================
-# SmartPeças ERP - docker-compose.yml (Estrutura Monorepo)
-# =============================================================================
-# Arquivo: /smartpecas/docker-compose.yml
-#
-# Descrição: Orquestra os serviços para o ambiente de DESENVOLVIMENTO,
-# com hot-reload para o backend e healthcheck para o banco de dados.
-#
-# Versão: 2.1 (Desenvolvimento)
-# Equipe SmartPeças
-# Atualizado em: 22/07/2025
-# =============================================================================
-
 services:
   db:
     image: postgres:15-alpine
@@ -31,20 +18,18 @@ services:
       retries: 5
 
   backend:
-    build: . # Constrói a partir da raiz
+    build: .
     container_name: smartpecas_backend
-    command: npm run start:backend # Roda o script definido no root package.json
+    command: npm run start:dev
     env_file: .env
     ports:
-      - "${PORT}:${PORT}"
+      - "${PORT:-3000}:${PORT:-3000}"
     depends_on:
       db:
         condition: service_healthy
     volumes:
-      # Mapeia as pastas necessárias para o hot-reload
-      - ./packages/backend:/usr/src/app/packages/backend
-      - ./prisma:/usr/src/app/prisma
-      # Exclui a node_modules para usar a do contêiner
+      - ./packages/backend/src:/usr/src/app/src
+      - ./packages/backend/prisma:/usr/src/app/prisma
       - /usr/src/app/node_modules
 
 volumes:

@@ -1,23 +1,10 @@
-// =============================================================================
-// SmartPeças ERP - Guard - Autorização por Roles (Cargos)
-// =============================================================================
-// Arquivo: src/shared/guards/roles.guard.ts
-//
-// Descrição: Guardião que verifica se o usuário autenticado possui algum dos
-// cargos (roles) definidos pelo decorador @Roles para acessar uma rota.
-//
-// Versão: 1.0.0
-// Equipe SmartPeças
-// Atualizado em: 16/07/2025
-// =============================================================================
-
-import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ROLES_KEY } from '../decorators/roles.decorator';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}
+  constructor(private readonly reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
     const requiredRoles = this.reflector.getAllAndOverride<string[]>(ROLES_KEY, [
@@ -25,14 +12,18 @@ export class RolesGuard implements CanActivate {
       context.getClass(),
     ]);
 
-    // Se a rota não exige nenhum cargo, permite o acesso
-    if (!requiredRoles || requiredRoles.length === 0) {
+    if (!requiredRoles?.length) {
       return true;
     }
 
     const { user } = context.switchToHttp().getRequest();
-    
-    // Verifica se o array de cargos do usuário inclui algum dos cargos requeridos
-    return requiredRoles.some((role) => user.roles?.includes(role));
+    if (!user) {
+      return false;
+    }
+
+    const userRoles = Array.isArray(user.roles) ? user.roles : [user.role].filter(Boolean);
+    const normalizedUserRoles = userRoles.map((role: string) => role.toUpperCase());
+
+    return requiredRoles.some((role) => normalizedUserRoles.includes(role.toUpperCase()));
   }
 }
