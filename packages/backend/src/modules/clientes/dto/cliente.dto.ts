@@ -156,7 +156,6 @@ export class UpdateClienteDto {
   @ApiPropertyOptional()
   @IsString()
   @IsOptional()
-  @IsDocumentoValido()
   documento?: string;
 
   @ApiPropertyOptional()
@@ -168,6 +167,19 @@ export class UpdateClienteDto {
   @IsBoolean()
   @IsOptional()
   isAtivo?: boolean;
+}
+
+export class ValidarDocumentoDto {
+  @ApiProperty({ enum: TipoCliente })
+  @IsEnum(TipoCliente)
+  @IsNotEmpty()
+  tipoCliente: TipoCliente;
+
+  @ApiProperty()
+  @IsString()
+  @IsNotEmpty()
+  @IsDocumentoValido()
+  documento: string;
 }
 
 export class ConsultarClienteDto {
@@ -271,6 +283,12 @@ export class ClienteResponseDto {
   isAtivo?: boolean;
   enderecos?: EnderecoResponseDto[];
   contatos?: ContatoResponseDto[];
+}
+
+export class DocumentoValidadoResponseDto {
+  valido: boolean;
+  tipoCliente: TipoCliente;
+  documento: string;
 }
 
 export class EstatisticasResumoDto {

@@ -14,10 +14,12 @@ import {
   CreateClienteDto,
   CreateContatoDto,
   CreateEnderecoDto,
+  DocumentoValidadoResponseDto,
   TipoCliente,
   UpdateClienteDto,
   UpdateContatoDto,
   UpdateEnderecoDto,
+  ValidarDocumentoDto,
 } from '../dto/cliente.dto';
 import { DocumentoValidatorService } from '../validacoes/documento-validator.service';
 import { UnicidadeValidatorService } from '../validacoes/unicidade-validator.service';
@@ -108,6 +110,16 @@ export class ClientesService {
     return response;
   }
 
+  async validarDocumento(dto: ValidarDocumentoDto): Promise<DocumentoValidadoResponseDto> {
+    const documento = this.docValidator.validar(dto.tipoCliente as any, dto.documento);
+
+    return {
+      valido: true,
+      tipoCliente: dto.tipoCliente,
+      documento,
+    };
+  }
+
   async listar(filtros: ConsultarClienteDto) {
     const tenantId = this.tenantContext.getTenantId();
 
@@ -152,9 +164,12 @@ export class ClientesService {
     const documentoLimpo = dto.documento ? this.limparDocumentoObrigatorio(dto.documento) : undefined;
 
     const response = await this.prisma.$transaction(async (tx) => {
-      if (documentoLimpo) {
+      if (documentoLimpo || dto.tipoCliente) {
         const tipoDocumento = dto.tipoCliente ?? (clienteAnterior.tipoCliente as TipoCliente);
-        await this.docValidator.validar(tipoDocumento, documentoLimpo);
+        const documentoParaValidar = documentoLimpo ?? clienteAnterior.documento;
+        await this.docValidator.validar(tipoDocumento as any, documentoParaValidar);
+      }
+      if (documentoLimpo) {
         await this.unicidadeValidator.validarDocumento(tenantId, documentoLimpo, id, tx);
       }
       if (dto.email) await this.unicidadeValidator.validarEmail(tenantId, dto.email, id, tx);

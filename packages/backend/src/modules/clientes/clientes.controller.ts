@@ -25,10 +25,12 @@ import {
   CreateClienteDto,
   CreateContatoDto,
   CreateEnderecoDto,
+  DocumentoValidadoResponseDto,
   EstatisticasResumoDto,
   UpdateClienteDto,
   UpdateContatoDto,
   UpdateEnderecoDto,
+  ValidarDocumentoDto,
 } from './dto/cliente.dto';
 import { ClientesService } from './services/clientes.service';
 import { ClientesIntegrationService } from './services/clientes-integration.service';
@@ -69,6 +71,16 @@ export class ClientesController {
   @ApiOperation({ summary: 'Lista clientes com filtros e paginacao.' })
   async listar(@Query(ValidationPipe) filtros: ConsultarClienteDto) {
     return this.clientesService.listar(filtros);
+  }
+
+  @Post('validar-documento')
+  @Roles('admin', 'manager', 'sales')
+  @ApiOperation({ summary: 'Valida CPF ou CNPJ conforme o tipo de cliente.' })
+  @ApiResponse({ status: 200, type: DocumentoValidadoResponseDto })
+  async validarDocumento(
+    @Body(ValidationPipe) dto: ValidarDocumentoDto,
+  ): Promise<DocumentoValidadoResponseDto> {
+    return this.clientesService.validarDocumento(dto);
   }
 
   @Get('estatisticas')
