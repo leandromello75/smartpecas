@@ -1,10 +1,10 @@
 import { Module, ValidationPipe } from '@nestjs/common';
 import { APP_GUARD, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
-import { CacheModule } from '@nestjs/cache-manager';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { envValidationSchema } from './config/env.validation';
 import { PrismaModule } from './prisma/prisma.module';
+import { AppCacheModule } from './common/cache/app-cache.module';
 import { CommonModule } from './common/common.module';
 import { AuthModule } from './auth/auth.module';
 import { TenantModule } from './tenant/tenant.module';
@@ -22,15 +22,7 @@ import { TransformInterceptor } from './shared/interceptors/transform.intercepto
       validationSchema: envValidationSchema,
     }),
 
-    CacheModule.registerAsync({
-      isGlobal: true,
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        ttl: configService.get<number>('CACHE_TTL') ?? 300,
-      }),
-      inject: [ConfigService],
-    }),
-
+    AppCacheModule,
     ThrottlerModule.forRoot([{ ttl: 60000, limit: 20 }]),
 
     HealthModule,
