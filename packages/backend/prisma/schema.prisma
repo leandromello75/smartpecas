@@ -13,7 +13,6 @@
 
 generator client {
   provider = "prisma-client-js"
-  output   = "./src/generated/prisma-client"
 }
 
 
@@ -61,25 +60,588 @@ enum OperacaoAuditoria {
   DESMARCAR_INADIMPLENTE
 }
 
+enum ProductStatus {
+  ATIVO
+  INATIVO
+  BLOQUEADO
+  DESCONTINUADO
+}
+
+enum ProductType {
+  MERCADORIA_REVENDA
+  PECA_OFICINA
+  KIT
+  SERVICO_ASSOCIADO
+  CONSUMO_INTERNO
+  BRINDE
+  GARANTIA
+  SOB_ENCOMENDA
+}
+
+enum ProductIdentifierType {
+  SKU
+  BARCODE
+  GTIN_UNITARIO
+  GTIN_CAIXA
+  CODIGO_FORNECEDOR
+  CODIGO_FABRICANTE
+  CODIGO_OEM
+  CODIGO_ANTIGO
+  CODIGO_SUBSTITUTO
+  CODIGO_EQUIVALENTE
+  CODIGO_CATALOGO
+}
+
+enum ProductQualityStatus {
+  COMPLETO
+  INCOMPLETO
+  PENDENTE_FISCAL
+  PENDENTE_APLICACAO
+  PENDENTE_FOTO
+  PENDENTE_CUSTO
+  BLOQUEADO_VENDA
+  BLOQUEADO_COMPRA
+}
+
+enum StockMovementType {
+  ENTRADA_COMPRA
+  ENTRADA_MANUAL
+  SAIDA_VENDA
+  SAIDA_OS
+  TRANSFERENCIA
+  AJUSTE_POSITIVO
+  AJUSTE_NEGATIVO
+  DEVOLUCAO_CLIENTE
+  DEVOLUCAO_FORNECEDOR
+  GARANTIA
+  PERDA
+  AVARIA
+  CONSUMO_INTERNO
+  BONIFICACAO
+  INVENTARIO
+}
+
+enum ProductAttachmentType {
+  FOTO_PRINCIPAL
+  FOTO_ADICIONAL
+  FICHA_TECNICA
+  MANUAL_INSTALACAO
+  CERTIFICADO
+  TABELA_APLICACAO
+  LAUDO
+  PDF_FORNECEDOR
+  IMAGEM_EMBALAGEM
+  IMAGEM_CODIGO_BARRAS
+}
+
 // =============================================================================
 // MODELOS EM ORDEM DE DEPENDÊNCIA
 // =============================================================================
 
 model Product {
-  id          String    @id @default(uuid())
-  name        String
-  description String?
-  price       Decimal   @db.Decimal(10, 2)
-  sku         String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  tenantId    String
-  tenant      Tenant    @relation(fields: [tenantId], references: [id])
-  orderItems  OrderItem[]
+  id                       String               @id @default(uuid())
+  name                     String
+  description              String?
+  shortDescription         String?
+  fiscalDescription        String?
+  complementaryDescription String?
+  price                    Decimal              @db.Decimal(10, 2)
+  sku                      String?
+  unitOfMeasure            String               @default("UN")
+  status                   ProductStatus        @default(ATIVO)
+  type                     ProductType          @default(MERCADORIA_REVENDA)
+  qualityStatus            ProductQualityStatus @default(INCOMPLETO)
+  internalNotes            String?
+  lastChangedBy            String?
+  createdAt                DateTime             @default(now())
+  updatedAt                DateTime             @updatedAt
+  tenantId                 String
+
+  brandId        String?
+  manufacturerId String?
+  groupId        String?
+  familyId       String?
+  categoryId     String?
+
+  tenant       Tenant               @relation(fields: [tenantId], references: [id])
+  brand        ProductBrand?        @relation(fields: [brandId], references: [id])
+  manufacturer ProductManufacturer? @relation(fields: [manufacturerId], references: [id])
+  group        ProductGroup?        @relation(fields: [groupId], references: [id])
+  family       ProductFamily?       @relation(fields: [familyId], references: [id])
+  category     ProductCategory?     @relation(fields: [categoryId], references: [id])
+
+  identifiers         ProductIdentifier[]
+  taxProfile          ProductTaxProfile?
+  pricing             ProductPrice?
+  cost                ProductCost?
+  stocks              ProductStock[]
+  stockMovements      StockMovement[]
+  vehicleApplications ProductVehicleApplication[]
+  attachments         ProductAttachment[]
+  searchLogs          ProductSearchLog[]
+  orderItems          OrderItem[]
 
   @@map("products")
   @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, name])
+  @@index([tenantId, qualityStatus])
   @@unique([sku, tenantId])
+  @@unique([id, tenantId], name: "product_id_tenantId")
+}
+
+model ProductBrand {
+  id        String   @id @default(uuid())
+  tenantId  String
+  name      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant   Tenant    @relation(fields: [tenantId], references: [id])
+  products Product[]
+
+  @@map("product_brands")
+  @@unique([tenantId, name])
+  @@index([tenantId, isActive])
+}
+
+model ProductManufacturer {
+  id        String   @id @default(uuid())
+  tenantId  String
+  name      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant   Tenant    @relation(fields: [tenantId], references: [id])
+  products Product[]
+
+  @@map("product_manufacturers")
+  @@unique([tenantId, name])
+  @@index([tenantId, isActive])
+}
+
+model ProductGroup {
+  id          String   @id @default(uuid())
+  tenantId    String
+  name        String
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant   Tenant          @relation(fields: [tenantId], references: [id])
+  products Product[]
+  families ProductFamily[]
+
+  @@map("product_groups")
+  @@unique([tenantId, name])
+  @@index([tenantId, isActive])
+}
+
+model ProductFamily {
+  id          String   @id @default(uuid())
+  tenantId    String
+  groupId     String?
+  name        String
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant   Tenant        @relation(fields: [tenantId], references: [id])
+  group    ProductGroup? @relation(fields: [groupId], references: [id])
+  products Product[]
+
+  @@map("product_families")
+  @@unique([tenantId, name])
+  @@index([tenantId, groupId])
+  @@index([tenantId, isActive])
+}
+
+model ProductCategory {
+  id          String   @id @default(uuid())
+  tenantId    String
+  name        String
+  description String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant   Tenant    @relation(fields: [tenantId], references: [id])
+  products Product[]
+
+  @@map("product_categories")
+  @@unique([tenantId, name])
+  @@index([tenantId, isActive])
+}
+
+model ProductIdentifier {
+  id             String                @id @default(uuid())
+  tenantId       String
+  productId      String
+  type           ProductIdentifierType
+  code           String
+  normalizedCode String
+  description    String?
+  source         String?
+  isPrimary      Boolean               @default(false)
+  isActive       Boolean               @default(true)
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("product_identifiers")
+  @@unique([tenantId, productId, type, normalizedCode], name: "product_identifier_product_code_unique")
+  @@index([tenantId, normalizedCode])
+  @@index([tenantId, productId])
+}
+
+model ProductTaxProfile {
+  id                          String   @id @default(uuid())
+  tenantId                    String
+  productId                   String   @unique
+  ncm                         String?
+  ncmDescription              String?
+  cest                        String?
+  origin                      String?
+  commercialUnit              String?
+  taxableUnit                 String?
+  commercialGtin              String?
+  taxableGtin                 String?
+  exTipi                      String?
+  fiscalItemType              String?
+  cfopSale                    String?
+  cfopPurchase                String?
+  icmsCst                     String?
+  icmsCsosn                   String?
+  icmsAliquot                 Decimal? @db.Decimal(7, 4)
+  icmsBaseReductionPercent    Decimal? @db.Decimal(7, 4)
+  icmsMvaPercent              Decimal? @db.Decimal(7, 4)
+  fcpAliquot                  Decimal? @db.Decimal(7, 4)
+  pisCst                      String?
+  pisAliquot                  Decimal? @db.Decimal(7, 4)
+  cofinsCst                   String?
+  cofinsAliquot               Decimal? @db.Decimal(7, 4)
+  ipiCst                      String?
+  ipiAliquot                  Decimal? @db.Decimal(7, 4)
+  ipiEnquadramento            String?
+  fiscalBenefitCode           String?
+  taxObservation              String?
+  hasSubstitutionTax          Boolean  @default(false)
+  isMonophasic                Boolean  @default(false)
+  isImported                  Boolean  @default(false)
+  isUsed                      Boolean  @default(false)
+  officialFiscalDescription   String?
+  defaultFiscalProfile        String?
+  classificationSource        String?
+  classificationReviewedAt    DateTime?
+  classificationValidFrom     DateTime?
+  classificationValidTo       DateTime?
+  requiresFiscalReview        Boolean  @default(false)
+  blocksInvoiceWhenIncomplete Boolean  @default(true)
+  createdAt                   DateTime @default(now())
+  updatedAt                   DateTime @updatedAt
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("product_tax_profiles")
+  @@index([tenantId, ncm])
+  @@index([tenantId, cest])
+  @@index([tenantId, requiresFiscalReview])
+}
+
+model ProductPrice {
+  id                 String   @id @default(uuid())
+  tenantId           String
+  productId          String   @unique
+  salePrice          Decimal  @db.Decimal(10, 2)
+  promotionalPrice   Decimal? @db.Decimal(10, 2)
+  minSalePrice       Decimal? @db.Decimal(10, 2)
+  desiredMargin      Decimal? @db.Decimal(7, 4)
+  maxDiscountPercent Decimal? @db.Decimal(7, 4)
+  commissionPercent  Decimal? @db.Decimal(7, 4)
+  lastPriceChangedAt DateTime?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("product_prices")
+  @@index([tenantId, salePrice])
+}
+
+model ProductCost {
+  id                    String   @id @default(uuid())
+  tenantId              String
+  productId             String   @unique
+  lastPurchaseCost      Decimal? @db.Decimal(10, 2)
+  averageCost           Decimal? @db.Decimal(10, 2)
+  fiscalAverageCost     Decimal? @db.Decimal(10, 2)
+  managerialCost        Decimal? @db.Decimal(10, 2)
+  replacementCost       Decimal? @db.Decimal(10, 2)
+  freightCost           Decimal? @db.Decimal(10, 2)
+  nonRecoverableTaxCost Decimal? @db.Decimal(10, 2)
+  extraCost             Decimal? @db.Decimal(10, 2)
+  lastCostAt            DateTime?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("product_costs")
+  @@index([tenantId, lastCostAt])
+}
+
+model StockWarehouse {
+  id        String   @id @default(uuid())
+  tenantId  String
+  code      String
+  name      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant         Tenant          @relation(fields: [tenantId], references: [id])
+  locations      StockLocation[]
+  productStocks  ProductStock[]
+  stockMovements StockMovement[]
+
+  @@map("stock_warehouses")
+  @@unique([tenantId, code])
+  @@index([tenantId, isActive])
+}
+
+model StockLocation {
+  id          String   @id @default(uuid())
+  tenantId    String
+  warehouseId String
+  code        String
+  name        String?
+  aisle       String?
+  shelf       String?
+  bin         String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tenant             Tenant          @relation(fields: [tenantId], references: [id])
+  warehouse          StockWarehouse  @relation(fields: [warehouseId], references: [id], onDelete: Cascade)
+  productStocks      ProductStock[]
+  movementsFrom      StockMovement[] @relation("StockMovementFromLocation")
+  movementsTo        StockMovement[] @relation("StockMovementToLocation")
+
+  @@map("stock_locations")
+  @@unique([tenantId, warehouseId, code])
+  @@index([tenantId, isActive])
+}
+
+model ProductStock {
+  id               String   @id @default(uuid())
+  tenantId         String
+  productId        String
+  warehouseId      String
+  locationId       String?
+  currentStock     Decimal  @default(0) @db.Decimal(15, 3)
+  availableStock   Decimal  @default(0) @db.Decimal(15, 3)
+  reservedStock    Decimal  @default(0) @db.Decimal(15, 3)
+  incomingStock    Decimal  @default(0) @db.Decimal(15, 3)
+  inTransitStock   Decimal  @default(0) @db.Decimal(15, 3)
+  minimumStock     Decimal? @db.Decimal(15, 3)
+  maximumStock     Decimal? @db.Decimal(15, 3)
+  reorderPoint     Decimal? @db.Decimal(15, 3)
+  economicLot      Decimal? @db.Decimal(15, 3)
+  purchaseLeadTime Int?
+  dailyAverageSale Decimal? @db.Decimal(15, 3)
+  coverageDays     Int?
+  lastMovementAt   DateTime?
+  lastSaleAt       DateTime?
+  lastPurchaseAt   DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  tenant    Tenant          @relation(fields: [tenantId], references: [id])
+  product   Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  warehouse StockWarehouse  @relation(fields: [warehouseId], references: [id])
+  location  StockLocation?  @relation(fields: [locationId], references: [id])
+
+  @@map("product_stocks")
+  @@index([tenantId, productId])
+  @@index([tenantId, warehouseId])
+  @@index([tenantId, locationId])
+}
+
+model StockMovement {
+  id             String            @id @default(uuid())
+  tenantId       String
+  productId      String
+  warehouseId    String?
+  fromLocationId String?
+  toLocationId   String?
+  type           StockMovementType
+  quantity       Decimal           @db.Decimal(15, 3)
+  balanceAfter   Decimal?          @db.Decimal(15, 3)
+  reference      String?
+  reason         String?
+  occurredAt     DateTime          @default(now())
+  createdBy      String?
+  createdAt      DateTime          @default(now())
+
+  tenant       Tenant          @relation(fields: [tenantId], references: [id])
+  product      Product         @relation(fields: [productId], references: [id])
+  warehouse    StockWarehouse? @relation(fields: [warehouseId], references: [id])
+  fromLocation StockLocation?  @relation("StockMovementFromLocation", fields: [fromLocationId], references: [id])
+  toLocation   StockLocation?  @relation("StockMovementToLocation", fields: [toLocationId], references: [id])
+
+  @@map("stock_movements")
+  @@index([tenantId, productId, occurredAt])
+  @@index([tenantId, type])
+}
+
+model VehicleMake {
+  id        String   @id @default(uuid())
+  tenantId  String
+  name      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant       Tenant                      @relation(fields: [tenantId], references: [id])
+  models       VehicleModel[]
+  applications ProductVehicleApplication[]
+
+  @@map("vehicle_makes")
+  @@unique([tenantId, name])
+  @@index([tenantId, isActive])
+}
+
+model VehicleModel {
+  id        String   @id @default(uuid())
+  tenantId  String
+  makeId    String
+  name      String
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tenant       Tenant                      @relation(fields: [tenantId], references: [id])
+  make         VehicleMake                 @relation(fields: [makeId], references: [id], onDelete: Cascade)
+  versions     VehicleVersion[]
+  applications ProductVehicleApplication[]
+
+  @@map("vehicle_models")
+  @@unique([tenantId, makeId, name])
+  @@index([tenantId, isActive])
+}
+
+model VehicleVersion {
+  id           String   @id @default(uuid())
+  tenantId     String
+  modelId      String
+  name         String
+  engine       String?
+  fuel         String?
+  transmission String?
+  body         String?
+  displacement String?
+  power        String?
+  startYear    Int?
+  endYear      Int?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  tenant       Tenant                      @relation(fields: [tenantId], references: [id])
+  model        VehicleModel                @relation(fields: [modelId], references: [id], onDelete: Cascade)
+  applications ProductVehicleApplication[]
+
+  @@map("vehicle_versions")
+  @@unique([tenantId, modelId, name, engine])
+  @@index([tenantId, isActive])
+}
+
+model ProductVehicleApplication {
+  id               String   @id @default(uuid())
+  tenantId         String
+  productId        String
+  vehicleMakeId    String?
+  vehicleModelId   String?
+  vehicleVersionId String?
+  makeName         String?
+  modelName        String?
+  versionName      String?
+  yearStart        Int?
+  yearEnd          Int?
+  engine           String?
+  position         String?
+  side             String?
+  axle             String?
+  technicalNote    String?
+  restriction      String?
+  relatedOemCode   String?
+  source           String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  tenant         Tenant          @relation(fields: [tenantId], references: [id])
+  product        Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  vehicleMake    VehicleMake?    @relation(fields: [vehicleMakeId], references: [id])
+  vehicleModel   VehicleModel?   @relation(fields: [vehicleModelId], references: [id])
+  vehicleVersion VehicleVersion? @relation(fields: [vehicleVersionId], references: [id])
+
+  @@map("product_vehicle_applications")
+  @@index([tenantId, productId])
+  @@index([tenantId, vehicleMakeId, vehicleModelId])
+  @@index([tenantId, makeName, modelName])
+}
+
+model ProductAttachment {
+  id           String                @id @default(uuid())
+  tenantId     String
+  productId    String
+  type         ProductAttachmentType
+  fileName     String
+  url          String
+  mimeType     String?
+  sizeBytes    Int?
+  version      Int                   @default(1)
+  isPrimary    Boolean               @default(false)
+  isDeleted    Boolean               @default(false)
+  uploadedBy   String?
+  createdAt    DateTime              @default(now())
+  updatedAt    DateTime              @updatedAt
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@map("product_attachments")
+  @@index([tenantId, productId])
+  @@index([tenantId, type])
+}
+
+model ProductSearchLog {
+  id              String   @id @default(uuid())
+  tenantId        String
+  productId       String?
+  query           String
+  normalizedQuery String
+  searchType      String?
+  resultCount     Int      @default(0)
+  userId          String?
+  createdAt       DateTime @default(now())
+
+  tenant  Tenant   @relation(fields: [tenantId], references: [id])
+  product Product? @relation(fields: [productId], references: [id])
+
+  @@map("product_search_logs")
+  @@index([tenantId, normalizedQuery])
+  @@index([tenantId, createdAt])
 }
 
 model EnderecoCliente {
@@ -218,6 +780,25 @@ model Tenant {
   adminUsers    AdminUser[]
   users         User[]
   products      Product[]
+  productBrands ProductBrand[]
+  productManufacturers ProductManufacturer[]
+  productGroups ProductGroup[]
+  productFamilies ProductFamily[]
+  productCategories ProductCategory[]
+  productIdentifiers ProductIdentifier[]
+  productTaxProfiles ProductTaxProfile[]
+  productPrices ProductPrice[]
+  productCosts ProductCost[]
+  productStocks ProductStock[]
+  stockWarehouses StockWarehouse[]
+  stockLocations StockLocation[]
+  stockMovements StockMovement[]
+  vehicleMakes VehicleMake[]
+  vehicleModels VehicleModel[]
+  vehicleVersions VehicleVersion[]
+  productVehicleApplications ProductVehicleApplication[]
+  productAttachments ProductAttachment[]
+  productSearchLogs ProductSearchLog[]
   clientes      Cliente[]
   orders        Order[]
   idempotencyKeys IdempotencyKey[]
@@ -240,4 +821,3 @@ model AdminUser {
 
   @@map("admin_users")
 }
-
