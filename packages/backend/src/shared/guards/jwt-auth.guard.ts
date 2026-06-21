@@ -5,10 +5,6 @@
 //
 // Descrição: Guardião base que utiliza a estratégia 'jwt' do Passport para proteger
 // rotas, com tratamento customizado de falhas na autenticação.
-//
-// Versão: 1.1.1
-// Equipe SmartPeças
-// Atualizado em: 16/07/2025
 // =============================================================================
 
 import {
@@ -18,7 +14,7 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 
 @Injectable()
-export class JwtAuthGuard extends AuthGuard('jwt') {
+export class JwtAuthGuard extends AuthGuard('jwt-admin') {
   override handleRequest(err: any, user: any): any {
     if (err || !user) {
       throw new UnauthorizedException('Acesso negado. Token inválido ou ausente.');
