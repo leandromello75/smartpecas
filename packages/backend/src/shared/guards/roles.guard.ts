@@ -17,7 +17,7 @@ import { ROLES_KEY } from '../decorators/roles.decorator';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}
+  constructor(private readonly reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
     const requiredRoles = this.reflector.getAllAndOverride<string[]>(ROLES_KEY, [
@@ -26,13 +26,28 @@ export class RolesGuard implements CanActivate {
     ]);
 
     // Se a rota não exige nenhum cargo, permite o acesso
-    if (!requiredRoles || requiredRoles.length === 0) {
+    if (!requiredRoles?.length) {
       return true;
     }
 
     const { user } = context.switchToHttp().getRequest();
-    
-    // Verifica se o array de cargos do usuário inclui algum dos cargos requeridos
-    return requiredRoles.some((role) => user.roles?.includes(role));
+
+    if (!user) {
+      return false;
+    }
+
+    const normalizeRole = (role: unknown): string =>
+      String(role ?? '').trim().toUpperCase();
+
+    const userRoles = [
+      user.role,
+      ...(Array.isArray(user.roles) ? user.roles : []),
+    ]
+      .map(normalizeRole)
+      .filter(Boolean);
+
+    const normalizedRequiredRoles = requiredRoles.map(normalizeRole);
+
+    return normalizedRequiredRoles.some((role) => userRoles.includes(role));
   }
 }
