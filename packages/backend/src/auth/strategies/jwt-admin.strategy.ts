@@ -5,10 +5,6 @@
 //
 // Descrição: Estratégia Passport para autenticação JWT de administradores globais.
 // Valida o token, busca o usuário no banco, verifica status do tenant e papel.
-//
-// Versão: 3.1.3
-// Equipe SmartPeças + Refatoração IA
-// Atualizado em: 08/07/2025
 // =============================================================================
 
 import { ExtractJwt, Strategy } from 'passport-jwt';
@@ -26,8 +22,9 @@ import { JwtAdminPayload } from '../../shared/interfaces/jwt-payload.interface';
 
 // Interface segura para retornar ao contexto da requisição
 // Ela espera TODOS os campos de AdminUser, exceto 'password'.
-export type SafeAdminUser = Omit<AdminUser, 'password'> & { 
-  tenant: { id: string; billingStatus: string; isActive: boolean }; 
+export type SafeAdminUser = Omit<AdminUser, 'password'> & {
+  sub: string;
+  tenant: { id: string; billingStatus: string; isActive: boolean };
 };
 
 @Injectable()
@@ -105,16 +102,13 @@ export class JwtAdminStrategy extends PassportStrategy(Strategy, 'jwt-admin') {
       const { password, ...safeUserFromDb } = adminUser;
       
       const safeUser: SafeAdminUser = {
-        ...safeUserFromDb, // Inclui todos os campos do adminUser (exceto password)
-        name: safeUserFromDb.name ?? null, // Garante que name seja string | null
-        tenantId: safeUserFromDb.tenantId ?? null, // Garante que tenantId seja string | null
-        // Garante que o role seja o tipo Role para uso consistente
-        // A validação acima já garante que adminUser.role é compatível com Role
-        role: safeUserFromDb.role as Role, 
-        // O tipo 'tenant' já está correto vindo do select, mas preciso garantir que não é null
-        tenant: safeUserFromDb.tenant as { id: string; billingStatus: string; isActive: boolean },
-        // is Active é boolean e virá corretamente do DB
-      };
+  ...safeUserFromDb,
+  sub: safeUserFromDb.id,
+  name: safeUserFromDb.name ?? null,
+  tenantId: safeUserFromDb.tenantId ?? null,
+  role: safeUserFromDb.role as Role,
+  tenant: safeUserFromDb.tenant as { id: string; billingStatus: string; isActive: boolean },
+};
       
       return safeUser;
     } catch (error: unknown) {
